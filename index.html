@@ -1,0 +1,1421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html{color-scheme:dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>The Digestive Dunk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Lobster+Two:ital,wght@1,700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: an editorial product page. Ordinary sections scroll past while one biscuit, drawn on a fixed canvas, stays on screen and glides between a set pose for each section. The flavours sit in a grid where the biscuit lands in its own slot; the dunk and the bite pin in place. Single committed dark look taken from a chocolate digestive packet: glossy milk-chocolate brown, royal blue bands, gold trim, cream and white type, a bold script for the big words. */
+:root{
+  --paper:#7A0A12;          /* deep packet red */
+  --paper-2:#8E121B;
+  --choc-deep:#2E0306;
+  --ink:#FBF1E2;            /* cream type */
+  --soft:#F3D3C2;
+  --rule:rgba(251,241,226,.2);
+  --biscuit:#F4B63E;        /* gold: accents, numbers, dunk times */
+  --gold:#F4B63E;
+  --blue:#2A2B85;           /* royal blue bands */
+  --blue-deep:#1C1D62;
+  --f-display:"Cormorant Garamond","Cormorant",Garamond,"Times New Roman",serif;
+  --f-script:"Lobster Two","Brush Script MT","Segoe Script",Georgia,serif;
+  --f-body:Manrope,"Helvetica Neue",Arial,system-ui,sans-serif;
+  --gut:max(16px,env(safe-area-inset-left,0px));
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:auto}
+html.lenis,html.lenis body{height:auto}
+.lenis-stopped{overflow:hidden}
+body{background:radial-gradient(70% 55% at 18% 12%,rgba(170,26,34,.5),transparent 70%),radial-gradient(60% 50% at 88% 38%,rgba(150,20,28,.4),transparent 70%),radial-gradient(80% 60% at 30% 85%,rgba(40,2,5,.55),transparent 70%),linear-gradient(165deg,#8E121B 0%,#7A0A12 45%,#56060C 100%);background-attachment:fixed;background-color:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;overflow-x:hidden}
+/* the backdrop reads as a biscuit packet's plastic film: faint crinkles, a fine grain and a few
+   soft glossy streaks where the light catches it. Kept quiet, behind everything. */
+body::before,body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none}
+body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cfilter id='c' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0045 0.018' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23ffffff' surfaceScale='2.4'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23c%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");background-size:700px 700px,220px 220px;mix-blend-mode:overlay;opacity:.24}
+body::after{background:linear-gradient(118deg,transparent 0 14%,rgba(255,236,236,.07) 21%,transparent 28%,transparent 52%,rgba(255,236,236,.05) 60%,rgba(255,236,236,.0) 64%,transparent 100%),linear-gradient(118deg,transparent 0 76%,rgba(255,240,240,.06) 82%,transparent 88%)}
+/* the blue sweeps up over the red as you scroll, led by a curved gold ribbon like the band on the packet */
+.wash{position:fixed;left:-12vw;right:-12vw;top:-6vh;height:125vh;z-index:-2;pointer-events:none;background:radial-gradient(70% 55% at 18% 12%,rgba(44,48,140,.5),transparent 70%),radial-gradient(60% 50% at 88% 38%,rgba(34,38,120,.4),transparent 70%),radial-gradient(80% 60% at 30% 85%,rgba(4,4,24,.6),transparent 70%),linear-gradient(165deg,#1D1F6E 0%,#16185A 45%,#0C0D3A 100%);border-radius:50% 50% 0 0/9vh 9vh 0 0;border-top:clamp(22px,2.8vw,38px) solid #F4B63E;box-shadow:0 -3px 0 #FFD777,0 -8px 0 #B07A1C,0 -16px 30px rgba(20,0,4,.35),inset 0 6px 10px rgba(255,220,120,.25);transform:translateY(calc((1 - var(--wash,0)) * 98vh - var(--wash,0) * 18vh));will-change:transform}
+/* the wheat belongs to the page and scrolls with it; only the sheen and grain stay put */
+body{position:relative}
+.wheat{position:absolute;left:0;top:0;width:100%;height:100%;z-index:-3;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640' viewBox='0 0 640 640'%3E%3Cdefs%3E%3Cg id='e' fill='%23FF9A86'%3E%3Cg transform='translate%280 61%29'%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 0.0%29 rotate%28-36%29 scale%281.00%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -14.4%29 rotate%2836%29 scale%281.00%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 -32.0%29 rotate%28-36%29 scale%280.93%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -46.4%29 rotate%2836%29 scale%280.93%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 -64.0%29 rotate%28-36%29 scale%280.86%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -78.4%29 rotate%2836%29 scale%280.86%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 -96.0%29 rotate%28-36%29 scale%280.79%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -110.4%29 rotate%2836%29 scale%280.79%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%280 -124%29 scale%28.68%29'/%3E%3Cpath d='M-1.8 34 L1.8 34 L1.3 -120 L-1.3 -120 Z'/%3E%3C/g%3E%3C/g%3E%3C/defs%3E%3Cg opacity='.07'%3E%3Cuse href='%23e' transform='translate%28-199 -234%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28-199 406%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28-199 1046%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28441 -234%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28441 406%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28441 1046%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%281081 -234%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%281081 406%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%281081 1046%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28-489 -638%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28-489 2%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28-489 642%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28151 -638%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28151 2%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28151 642%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28791 -638%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28791 2%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28791 642%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28-246 -618%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-246 22%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-246 662%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28394 -618%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28394 22%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28394 662%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%281034 -618%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%281034 22%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%281034 662%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-580 -180%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-580 460%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-580 1100%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%2860 -180%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%2860 460%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%2860 1100%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28700 -180%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28700 460%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28700 1100%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-531 -417%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28-531 223%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28-531 863%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28109 -417%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28109 223%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28109 863%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28749 -417%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28749 223%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28749 863%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28-326 -400%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-326 240%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-326 880%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28314 -400%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28314 240%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28314 880%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28954 -400%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28954 240%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28954 880%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-57 -538%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-57 102%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-57 742%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28583 -538%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28583 102%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28583 742%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%281223 -538%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%281223 102%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%281223 742%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-387 -177%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28-387 463%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28-387 1103%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28253 -177%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28253 463%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28253 1103%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28893 -177%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28893 463%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28893 1103%29 rotate%28225%29 scale%280.91%29'/%3E%3C/g%3E%3C/svg%3E");background-size:640px 640px;background-repeat:repeat}
+#scene{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+main{position:relative}
+
+button:focus-visible{outline:2px solid var(--biscuit);outline-offset:3px}
+
+/* shared */
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px),6vw);padding-right:max(16px,env(safe-area-inset-right,0px),6vw)}
+.label{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:0}
+.serif{font-family:var(--f-display)}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;margin:0;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0}
+.small{font-size:13px;color:var(--soft);line-height:1.65}
+.end p{color:#D9DBFF}
+
+/* hero */
+.hero{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;padding-block:48px 76px;position:relative}
+.hero-top{display:grid;gap:.6rem;position:relative;z-index:4}
+.hero-bottom{display:flex;justify-content:space-between;align-items:end;gap:2rem;flex-wrap:wrap;position:relative;z-index:4}
+/* printed texture on the big white lettering: a copy of the word sits exactly on top, filled
+   with a fine ink speckle, soft mottling, a sheen across the top and a deeper tone at the
+   foot, so the white reads as ink printed on a packet rather than flat digital white */
+.hero-word::after{content:attr(data-text);position:absolute;inset:0;color:transparent;text-shadow:none;-webkit-background-clip:text;background-clip:text;background-image:linear-gradient(145deg,#FFFFFF 0%,#FBF6F4 38%,#E6D7D2 72%,#D2C0BA 100%);pointer-events:none}
+.end h2::after{content:attr(data-text);position:absolute;inset:0;color:transparent;text-shadow:none;-webkit-background-clip:text;background-clip:text;
+  background-image:linear-gradient(172deg,rgba(255,255,255,.0) 0%,rgba(255,255,255,.55) 18%,rgba(255,255,255,0) 38%),linear-gradient(180deg,rgba(120,20,24,0) 50%,rgba(120,20,24,.08) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5  0 0 0 0 .32  0 0 0 0 .3  0 0 0 -3.2 1.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23s%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62  0 0 0 0 .5  0 0 0 0 .46  0 0 0 -1.1 .62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23m%29'/%3E%3C/svg%3E");
+  background-size:100% 100%,100% 100%,240px 240px,600px 600px;pointer-events:none}
+.hero-word{position:absolute}
+.end h2{position:relative}
+.end h2::after{background-image:linear-gradient(172deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 18%,rgba(255,255,255,0) 38%),linear-gradient(180deg,rgba(20,22,90,0) 50%,rgba(20,22,90,.08) 100%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5  0 0 0 0 .32  0 0 0 0 .3  0 0 0 -3.2 1.62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23s%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012' numOctaves='3' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62  0 0 0 0 .5  0 0 0 0 .46  0 0 0 -1.1 .62'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23m%29'/%3E%3C/svg%3E")}
+/* the word sits behind the biscuit: below the canvas layer, spanning the width */
+.hero-word{position:absolute;left:0;right:0;top:45%;translate:0 -54%;margin:0;text-align:center;white-space:nowrap;pointer-events:none;font-family:var(--f-script);font-style:italic;font-weight:700;font-size:clamp(6.6rem,26.5vw,32rem);line-height:.8;color:#F7F1EE;letter-spacing:-.015em;rotate:-5deg;text-shadow:0.0007em 0.0010em 0 #E3D6D1,0.0014em 0.0020em 0 #E0D2CD,0.0021em 0.0030em 0 #DDCFCA,0.0028em 0.0040em 0 #DACCC6,0.0035em 0.0050em 0 #D8C8C3,0.0042em 0.0060em 0 #D5C5BF,0.0049em 0.0070em 0 #D2C1BC,0.0056em 0.0080em 0 #CFBEB8,0.0063em 0.0090em 0 #CCBBB5,0.0070em 0.0100em 0 #C9B7B2,0.0077em 0.0110em 0 #C6B4AE,0.0084em 0.0120em 0 #C4B0AB,0.0091em 0.0130em 0 #C1ADA7,0.0098em 0.0140em 0 #BEAAA4,0.0105em 0.0150em 0 #BBA6A0,0.0112em 0.0160em 0 #B8A39D,.018em .024em .008em rgba(70,4,10,.55),.03em .06em .09em rgba(30,0,3,.45)}
+.hero-sub{font-family:var(--f-display);font-style:italic;font-weight:500;font-size:clamp(1.6rem,3vw,2.6rem);line-height:1.1;color:var(--gold);max-width:15ch;text-wrap:balance}
+.hero .lede{max-width:32ch;font-size:15px;color:var(--soft)}
+.hero .meta{display:flex;gap:2.4rem;flex-wrap:wrap;position:absolute;z-index:4;top:0;right:0}
+@media (max-width:820px){.hero .meta{position:static;margin-top:1rem}}
+.meta div{display:grid;gap:.2rem}
+.meta b{font:400 1.6rem/1 var(--f-display);font-variant-numeric:lining-nums tabular-nums}
+.cue{position:absolute;z-index:4;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));translate:-50% 0;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);display:flex;flex-direction:column;align-items:center;gap:.5rem}
+.cue::after{content:"";width:1px;height:34px;background:var(--ink);transform-origin:top;animation:cue 2s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* anatomy: pinned; the camera visits three features one at a time */
+#anatomy{height:720vh}
+.an-head{position:absolute;left:0;right:0;top:calc(92px + env(safe-area-inset-top,0px));display:grid;gap:.8rem;justify-items:center;text-align:center;pointer-events:none}
+.an-head h2{font-size:clamp(2rem,3.8vw,3.4rem);line-height:1.02;max-width:20ch}
+.an-head h2 em{font-style:italic;color:var(--soft)}
+.an-note{position:absolute;top:50%;translate:0 -50%;width:min(34ch,30vw);display:grid;gap:.6rem;opacity:0;visibility:hidden;background:color-mix(in srgb,rgba(52,3,7,.9),rgba(14,15,62,.9) calc(var(--wash,0) * 100%));border:1px solid rgba(244,182,62,.4);box-shadow:0 10px 30px rgba(25,0,2,.4);border-radius:14px;padding:20px 22px}
+.an-note[data-side="left"]{left:max(16px,env(safe-area-inset-left,0px),6vw)}
+.an-note[data-side="right"]{right:max(16px,env(safe-area-inset-right,0px),6vw)}
+.an-note h3{font-size:clamp(1.9rem,3vw,2.7rem);line-height:1.02}
+.an-note h3 em{font-style:italic;color:var(--soft)}
+.an-note .label{display:flex;gap:.6rem;align-items:center}
+.an-note .num{font:600 10px var(--f-body);width:22px;height:22px;border-radius:50%;border:1px solid var(--ink);display:inline-grid;place-items:center;color:var(--ink);letter-spacing:0}
+
+/* pinned scenes */
+.pin{position:relative}
+.sticky{position:sticky;z-index:4;top:0;height:100vh;height:100svh;overflow:hidden}
+#dunk{height:640vh}
+#bite{height:320vh}
+
+/* flavours grid */
+.flavours{padding-block:120px 140px}
+/* the grid holds still (sticky) while the biscuit sits in its cell */
+.fl-pin{position:sticky;display:grid;gap:3rem}
+.fl-spacer{height:70vh}
+.fl-top{display:grid;justify-items:center;text-align:center;gap:1rem}
+.fl-top h2{font-size:clamp(2.4rem,5vw,4.6rem);line-height:.98;max-width:14ch}
+.fl-top h2 em{font-style:italic;color:var(--soft)}
+.fl-top p{max-width:34ch}
+.fl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.6rem 2.4rem;max-width:1180px;width:100%;justify-self:center}
+.card{display:grid;align-content:start;justify-items:center;text-align:center;gap:.7rem;border-top:1px solid var(--rule);padding-top:1.1rem;min-width:0}
+.card h3{font-size:1.5rem;line-height:1.05}
+.card .small{font-size:12.5px}
+.card .dunk{font:italic 500 1.05rem var(--f-display);color:var(--gold)}
+.thumb{width:min(100%,170px);aspect-ratio:1;max-width:100%;display:block}
+.slot{width:min(100%,170px);aspect-ratio:1;max-width:100%;position:relative}
+.slot::before{content:"";position:absolute;inset:11%;border-radius:50%;border:1px dashed var(--rule)}
+
+/* method / statement */
+.method{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;padding-block:96px 72px;position:relative}
+/* invisible spots the biscuit is pinned to, so it scrolls with the page */
+.spot{position:absolute;aspect-ratio:1;pointer-events:none}
+.hero-spot{left:50%;top:50%;translate:-50% -50%;width:min(88vw,86vh,960px)}
+.method-spot{left:50%;top:50%;translate:-50% -50%;width:min(20vw,26vh,230px)}
+.method h2{font-size:clamp(2.2rem,4.6vw,4.4rem);line-height:1;max-width:19ch;justify-self:center;text-align:center;grid-row:1}
+.method h2 em{font-style:italic;color:var(--soft)}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;border-top:1px solid var(--rule);padding-top:1.6rem;grid-row:3}
+.steps h3{font-size:1.6rem;margin:.35rem 0 .4rem}
+.steps .n{font:italic 400 1rem var(--f-display);color:var(--biscuit)}
+
+/* scene panels (dunk, bite) */
+.panels{position:absolute;z-index:4;left:max(16px,env(safe-area-inset-left,0px),6vw);top:50%;translate:0 -50%;width:min(34ch,30vw);display:grid}
+.panel{grid-area:1/1;opacity:0;visibility:hidden;background:color-mix(in srgb,rgba(52,3,7,.9),rgba(14,15,62,.9) calc(var(--wash,0) * 100%));border:1px solid rgba(244,182,62,.4);box-shadow:0 10px 30px rgba(25,0,2,.4);border-radius:14px;padding:18px 20px;margin-left:-20px}
+.panel h2{font-size:clamp(2.6rem,4.6vw,4.2rem);line-height:.95;margin:.6rem 0 1rem}
+.panel h2 em{font-style:italic}
+.panel p{color:var(--soft)}
+.readout{margin-top:1.4rem;display:flex;gap:2rem;border-top:1px solid var(--rule);padding-top:1rem}
+.readout b{display:block;font:400 2rem/1 var(--f-display);font-variant-numeric:lining-nums tabular-nums;color:var(--ink)}
+.formula{font-family:var(--f-display);font-style:italic;font-size:1.15em;color:var(--ink);white-space:nowrap}
+
+/* end */
+.end{min-height:100vh;min-height:100svh;display:grid;place-items:center;text-align:center;padding-block:120px;position:relative;overflow:hidden;background:radial-gradient(80% 60% at 50% 40%,#3537A0,transparent 70%),linear-gradient(180deg,var(--blue),var(--blue-deep));border-top:3px solid var(--gold)}
+.end .ghost{position:absolute;inset:auto 0 8%;font:300 clamp(5rem,22vw,20rem)/1 var(--f-display);color:rgba(255,255,255,.06);font-family:var(--f-script);font-style:italic;font-weight:700;letter-spacing:-.01em;white-space:nowrap;pointer-events:none;user-select:none}
+.end .inner{position:relative;display:grid;gap:1.2rem;justify-items:center}
+.end h2{font-family:var(--f-script);font-style:italic;font-weight:700;color:#fff;font-size:clamp(3.8rem,10vw,8rem);line-height:.95;letter-spacing:-.01em;rotate:-5deg;text-shadow:0.0014em 0.0035em 0 #181964,0.0028em 0.0070em 0 #181962,0.0042em 0.0105em 0 #171860,0.0056em 0.0140em 0 #16175E,0.0070em 0.0175em 0 #15165D,0.0084em 0.0210em 0 #15165B,0.0098em 0.0245em 0 #141559,0.0112em 0.0280em 0 #131457,0.0126em 0.0315em 0 #121455,0.0140em 0.0350em 0 #121353,0.0154em 0.0385em 0 #111251,0.0168em 0.0420em 0 #10114F,0.0182em 0.0455em 0 #10114D,0.0196em 0.0490em 0 #0F104C,0.0210em 0.0525em 0 #0E0F4A,0.0224em 0.0560em 0 #0D0E48,0.0238em 0.0595em 0 #0D0E46,0.0252em 0.0630em 0 #0C0D44,0.028em 0.076em .12em rgba(8,8,40,.45)}
+.end p{max-width:40ch;color:var(--soft)}
+.again{margin-top:.8rem;font:800 12px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--choc-deep);background:linear-gradient(180deg,#FFD06B,var(--gold));border:0;box-shadow:0 4px 0 #B07A1C;border-radius:999px;padding:.95rem 1.6rem;cursor:pointer}
+.foot{padding-block:28px 40px;background:var(--blue-deep);border-top:1px solid rgba(244,182,62,.35)}
+.foot p{max-width:70ch}
+
+@media (max-width:820px){
+  .hero-spot{width:min(96vw,62vh)}
+  .method-spot{width:min(30vw,16vh,120px)}
+  .hero{padding-block:80px 64px}
+  .hero-bottom{display:grid;gap:1.2rem}
+  .cue{display:none}
+  .hero-word{font-size:29.5vw}
+  .hero .meta{gap:1.6rem}
+  .an-head{top:calc(70px + env(safe-area-inset-top,0px))}
+  .an-head h2{font-size:1.7rem}
+  .an-note{top:auto;translate:none;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:max(16px,env(safe-area-inset-left,0px)) !important;right:max(16px,env(safe-area-inset-right,0px)) !important;width:auto;background:color-mix(in srgb,rgba(52,3,7,.9),rgba(14,15,62,.9) calc(var(--wash,0) * 100%));border:1px solid rgba(244,182,62,.4);box-shadow:0 10px 30px rgba(25,0,2,.4);border-radius:12px;padding:14px 16px}
+  .an-note h3{font-size:1.6rem}
+  .flavours{padding-block:90px 80px}
+  .fl-pin{gap:2rem}
+  .fl-grid{grid-template-columns:1fr 1fr;gap:1.6rem 1rem}
+  .slot,.thumb{width:min(100%,130px)}
+  .card.ours{grid-column:1/-1}
+  .method{padding-block:84px 48px}
+  .method h2{font-size:2rem}
+  .steps{grid-template-columns:1fr 1fr;gap:1.4rem}
+  .panels{top:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));translate:none;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));width:auto}
+  .panel{background:color-mix(in srgb,rgba(52,3,7,.9),rgba(14,15,62,.9) calc(var(--wash,0) * 100%));border:1px solid rgba(244,182,62,.4);box-shadow:0 10px 30px rgba(25,0,2,.4);border-radius:12px;padding:14px 16px;margin-left:0}
+  .panel h2{font-size:2.2rem;margin:.3rem 0 .5rem}
+  .panel p{font-size:14px}
+  .readout{margin-top:.8rem;padding-top:.6rem}
+  .readout b{font-size:1.5rem}
+}
+@media (prefers-reduced-motion:reduce){.cue::after{animation:none}}
+</style>
+</head>
+<body>
+
+
+
+<div class="wash" aria-hidden="true"></div>
+<div class="wheat" aria-hidden="true"></div>
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<main>
+  <section class="hero wrap" data-pose="hero" id="top" data-spot="hero-spot" data-rot="-.3">
+    <div class="spot hero-spot" id="hero-spot" aria-hidden="true"></div>
+    <h1 class="hero-word" data-text="Digestive">Digestive</h1>
+    <div class="hero-top">
+      <p class="hero-sub">A classic crunch loved since 1892</p>
+      <div class="meta">
+        <div><span class="label">Diameter</span><b>67 mm</b></div>
+        <div><span class="label">Tea</span><b>~70 °C</b></div>
+        <div><span class="label">Dunk</span><b>8 s</b></div>
+      </div>
+    </div>
+        <div class="cue" aria-hidden="true">Scroll</div>
+  </section>
+
+  <section class="pin" id="anatomy" data-pose="intro">
+    <div class="sticky">
+      <div class="an-head wrap" id="an-head" hidden></div>
+      <div class="an-note" data-side="left" data-ax="-.306" data-ay="-.661" data-zoom="3.2" data-tilt=".78" data-axis=".55">
+        <p class="label"><span class="num">1</span>Docking holes</p>
+        <h3>Pricked, <em>so it bakes flat.</em></h3>
+        <p class="small">Small holes pressed through the dough before baking let the steam out. Without them the biscuit would puff up and bake uneven.</p>
+      </div>
+      <div class="an-note" data-side="right" data-ax=".19" data-ay=".2" data-zoom="1.6" data-tilt=".55" data-axis="-1.35">
+        <p class="label"><span class="num">2</span>The stamp</p>
+        <h3>A wheat ear <em>and its name.</em></h3>
+        <p class="small">Pressed into the dough just before the oven, so it sets as it bakes and still shows on the finished biscuit.</p>
+      </div>
+      <div class="an-note" data-side="left" data-ax=".3" data-ay=".45" data-zoom="1.6" data-tilt=".32" data-axis="-1.1">
+        <p class="label"><span class="num">3</span>The crumb</p>
+        <h3>Sandy, open, <em>full of pores.</em></h3>
+        <p class="small">Wholemeal flour with flecks of bran and a little malt bakes into an open crumb, with thousands of tiny pores for the tea to climb.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="flavours wrap" id="flavours" data-pose="flavours" data-spot="slot">
+    <div class="fl-pin" id="fl-pin">
+    <div class="fl-top">
+      <div><p class="label">The range</p><h2>Nine digestives, <em>one for the cup.</em></h2></div>
+      <p class="small">Same wholemeal base, different tops. Watch the one in the middle: it was ours all along.</p>
+    </div>
+    <div class="fl-grid" id="fl-grid"></div>
+    </div>
+    <div class="fl-spacer" aria-hidden="true"></div>
+  </section>
+
+  <section class="method wrap" data-pose="method" data-spot="method-spot" data-rot="2.4">
+    <div class="spot method-spot" id="method-spot" aria-hidden="true"></div>
+    <h2>From the cup <em>to the mouth,</em> in eight seconds.</h2>
+    <div class="steps">
+      <div><span class="n">i.</span><h3>Choose</h3><p class="small">Milk chocolate. Turn it so the wheat side meets the tea.</p></div>
+      <div><span class="n">ii.</span><h3>Dip</h3><p class="small">Halfway in, at an angle, holding the dry end.</p></div>
+      <div><span class="n">iii.</span><h3>Count</h3><p class="small">Eight seconds. The tea climbs the crumb as you count.</p></div>
+      <div><span class="n">iv.</span><h3>Lift</h3><p class="small">Straight up and straight to the mouth. No pausing over the saucer.</p></div>
+    </div>
+  </section>
+
+  <section class="pin" id="dunk" data-pose="dunk">
+    <div class="sticky">
+      <div class="panels">
+        <div class="panel" data-a="-1" data-b=".2">
+          <p class="label">ii. Dip</p>
+          <h2>In it <em>goes.</em></h2>
+          <p>Wheat side down, about halfway in. The tea is around 70&nbsp;°C, hot enough to soften the fat that holds the crumb together.</p>
+        </div>
+        <div class="panel" data-a=".22" data-b=".68">
+          <p class="label">iii. Count · inside the cup</p>
+          <h2>The <em>soak.</em></h2>
+          <p>Tea creeps into thousands of tiny pores and climbs above the surface. The wet front follows <span class="formula">h² ∝ t</span>, the Washburn equation: twice the height takes four times as long.</p>
+          <div class="readout"><div><span class="label">Time</span><b><span id="r-time">0.0</span> s</b></div><div><span class="label">Soaked</span><b><span id="r-soak">0</span>%</b></div></div>
+        </div>
+        <div class="panel" data-a=".72" data-b="2">
+          <p class="label">iv. Lift</p>
+          <h2>Out, <em>before it drops.</em></h2>
+          <p>The wet half is heavier and weaker now. Keep it level and let it drip.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pin" id="bite" data-pose="bite">
+    <div class="sticky">
+      <div class="panels">
+        <div class="panel" data-a="-1" data-b="2">
+          <p class="label">v. Bite</p>
+          <h2>And <em>in.</em></h2>
+          <p>Soft at the bottom, still crisp at the top, gone in one go.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="end wrap" data-pose="end">
+    <div class="ghost" aria-hidden="true">Digestive</div>
+    <div class="inner">
+      <p class="label">Finished</p>
+      <h2 data-text="Gone.">Gone.</h2>
+      <p>Soft, sweet, slightly too warm. Put the kettle on again.</p>
+      <button class="again" id="again" type="button">Dunk another</button>
+    </div>
+  </section>
+
+  <footer class="foot wrap">
+    <p class="small">The soak follows Len Fisher's biscuit-dunking work (Nature, 1999), which used the Washburn equation for tea rising through a biscuit's pores. Flavour notes and dunk times are a matter of taste.</p>
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(function(){
+"use strict";
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+const TAU = Math.PI * 2;
+
+/* ---------- helpers ---------- */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seg = (p, a, b) => clamp((p - a) / (b - a));
+const ease = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eo = x => 1 - Math.pow(1 - x, 3);
+const lerp = (a, b, t) => a + (b - a) * t;
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const hash = i => { const r = rng(i * 9973 + 17); r(); return r(); };
+
+const COL = {ink:'#FBF1E2', soft:'#E3CBAE', cup:'#FBF9F5', shade:'#D8D0C2', gold:'#F4B63E', dark:'#2B1208'};
+
+/* ---------- flavours ---------- */
+const FLAVOURS = [
+  {id:'milk', name:'Milk Chocolate', note:'Milk chocolate on one side, wholemeal crumb on the other. The one we dunk.', dunk:'8 seconds, wheat side down'},
+  {id:'original', name:'The Original', note:'Plain wholemeal, malty and sandy.', dunk:'3 to 4 seconds'},
+  {id:'dark', name:'Dark Chocolate', note:'A darker, more bitter chocolate top.', dunk:'5 seconds'},
+  {id:'caramel', name:'Caramel', note:'A layer of caramel under milk chocolate.', dunk:'2 seconds, quickly'},
+  {id:'white', name:'White', note:'A white chocolate top on the wholemeal base.', dunk:'4 seconds'},
+  {id:'pink', name:'Pink', note:'A pink coating, sweet and bright.', dunk:'4 seconds'},
+  {id:'gold', name:'Gold', note:'A golden, caramel-coloured coating.', dunk:'4 seconds'},
+  {id:'serious', name:'Seriously Chocolatey', note:'A thicker chocolate top, with extra chocolate on it.', dunk:'6 seconds'},
+  {id:'light', name:'The Light One', note:'The plain biscuit, lighter in fat.', dunk:'3 seconds'}
+];
+const flGrid = document.getElementById('fl-grid');
+// ours goes in the middle cell, so it lines up with the biscuit at the centre of the screen
+[1, 2, 3, 4, 0, 5, 6, 7, 8].map(i => [FLAVOURS[i], i]).forEach(([f, i]) => {
+  const a = document.createElement('article');
+  a.className = 'card' + (i === 0 ? ' ours' : '');
+  a.innerHTML = (i === 0 ? '<div class="slot" id="slot" aria-hidden="true"></div>' : `<canvas class="thumb" data-id="${f.id}" width="260" height="260" aria-hidden="true"></canvas>`) +
+    '<h3></h3><p class="small"></p><p class="dunk"></p>';
+  a.querySelector('h3').textContent = f.name;
+  a.querySelector('.small').textContent = f.note;
+  a.querySelector('.dunk').textContent = 'Dunk: ' + f.dunk;
+  flGrid.appendChild(a);
+});
+
+/* ---------- biscuit textures ---------- */
+const TEX = 512, TR = 250;
+function newTex(){ const c = document.createElement('canvas'); c.width = c.height = TEX; const g = c.getContext('2d'); g.translate(TEX/2, TEX/2); return [c, g]; }
+// ---- digestive faces, drawn from reference photos ----
+// the irregular, hand-pressed outline of a real biscuit
+function biscuitPath(g, seed, R){
+  g.beginPath();
+  for (let i = 0; i <= 140; i++){
+    const a = i / 140 * TAU;
+    const w = R * (1 + .006 * Math.sin(a * 7 + seed) + .004 * Math.sin(a * 13 + seed * 2.3) + .003 * Math.sin(a * 23 + seed));
+    i ? g.lineTo(Math.cos(a) * w, Math.sin(a) * w) : g.moveTo(w, 0);
+  }
+  g.closePath();
+}
+// matte, sandy wholemeal surface with a darker baked edge
+function wheat(g, r, light){
+  biscuitPath(g, 1.3, TR); g.save(); g.clip();
+  const grad = g.createRadialGradient(-70, -80, 20, 0, 0, TR);
+  grad.addColorStop(0, light ? '#E2B57E' : '#D9A465');
+  grad.addColorStop(.7, light ? '#D3A26B' : '#C98F56');
+  grad.addColorStop(1, light ? '#BE8A52' : '#B37A43');
+  g.fillStyle = grad; g.fillRect(-TR, -TR, TR * 2, TR * 2);
+  for (let i = 0; i < 9000; i++){
+    const x = (r() * 2 - 1) * TR, y = (r() * 2 - 1) * TR, k = r(), s = .8 + r() * 1.6;
+    g.fillStyle = k < .5 ? `rgba(120,72,30,${.06 + r() * .12})` : `rgba(250,215,160,${.07 + r() * .14})`;
+    g.fillRect(x, y, s, s);
+  }
+  for (let i = 0; i < 240; i++){
+    const a = r() * TAU, d = Math.sqrt(r()) * TR;
+    g.fillStyle = `rgba(92,50,18,${.22 + r() * .3})`;
+    g.beginPath(); g.ellipse(Math.cos(a) * d, Math.sin(a) * d, .8 + r() * 1.8, .6 + r(), r() * 3, 0, TAU); g.fill();
+  }
+  for (let i = 0; i < 520; i++){
+    const a = r() * TAU, d = Math.sqrt(r()) * TR;
+    g.fillStyle = 'rgba(105,60,24,.2)';
+    g.beginPath(); g.arc(Math.cos(a) * d, Math.sin(a) * d, .6 + r() * 1.3, 0, TAU); g.fill();
+  }
+  const eg = g.createRadialGradient(0, 0, TR * .78, 0, 0, TR);
+  eg.addColorStop(0, 'rgba(140,85,40,0)'); eg.addColorStop(.75, 'rgba(140,85,40,.16)'); eg.addColorStop(1, 'rgba(105,58,22,.55)');
+  g.fillStyle = eg; g.fillRect(-TR, -TR, TR * 2, TR * 2);
+  g.lineWidth = 10; g.strokeStyle = 'rgba(255,226,175,.2)';
+  g.beginPath(); g.arc(0, 0, TR - 12, Math.PI * 1.05, Math.PI * 1.72); g.stroke();
+  g.restore();
+}
+// pressed-in shapes: shadow on the upper-left inner edge, light on the lower-right
+function deboss(g, draw){
+  g.save(); g.translate(-1.7, -1.7); g.fillStyle = g.strokeStyle = 'rgba(96,54,20,.6)'; draw(); g.restore();
+  g.save(); g.translate(1.7, 1.7); g.fillStyle = g.strokeStyle = 'rgba(255,228,182,.5)'; draw(); g.restore();
+  g.save(); g.fillStyle = g.strokeStyle = 'rgba(172,114,60,.92)'; draw(); g.restore();
+}
+function arcText(g, text, cy, radius, font, spacing){
+  g.font = font;
+  const ch = [...text], ws = ch.map(c => g.measureText(c).width + spacing);
+  let a = -Math.PI / 2 - ws.reduce((p, q) => p + q, 0) / radius / 2;
+  ch.forEach((c, i) => {
+    const ang = a + ws[i] / 2 / radius;
+    g.save(); g.translate(Math.cos(ang) * radius, cy + Math.sin(ang) * radius); g.rotate(ang + Math.PI / 2);
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(c, 0, 0); g.restore();
+    a += ws[i] / radius;
+  });
+}
+function stamp(g){
+  // a curved ear of wheat over the name, then the name arched across the middle
+  deboss(g, () => {
+    for (let i = 0; i < 7; i++){
+      const a = -2.12 + i * .19, x = Math.cos(a) * 140, y = 12 + Math.sin(a) * 140;
+      for (const side of [-1, 1]){
+        g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2 + side * .55);
+        g.beginPath(); g.ellipse(0, side * -9, 5.5, 12, 0, 0, TAU); g.fill(); g.restore();
+      }
+    }
+    g.lineWidth = 4; g.beginPath(); g.arc(0, 12, 140, -2.2, -.92); g.stroke();
+  });
+  deboss(g, () => arcText(g, 'DIGESTIVE', 520, 520, '900 46px "Arial Black", "Helvetica Neue", Arial, sans-serif', 3));
+  deboss(g, () => { g.font = '700 21px "Arial Black", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; [...'WHOLEMEAL'].forEach((c, i) => g.fillText(c, (i - 4) * 19, 70)); });
+}
+const HOLES = (() => {
+  const out = [];
+  for (let k = 0; k < 16; k++){ const a = (11.25 + 22.5 * k) * Math.PI / 180; out.push([Math.cos(a) * 205, Math.sin(a) * 205]); }
+  for (let k = 0; k < 8; k++){ const a = (22.5 + 45 * k) * Math.PI / 180; out.push([Math.cos(a) * 128, Math.sin(a) * 128]); }
+  out.push([0, 122]);
+  return out.filter(([x, y]) => !(Math.abs(x) < 95 && y > -158 && y < -80) && !(Math.abs(x) < 178 && y > -40 && y < 32));
+})();
+function holes(g){
+  HOLES.forEach(([x, y]) => {
+    g.fillStyle = 'rgba(255,226,175,.45)'; g.beginPath(); g.ellipse(x + 1.6, y + 1.8, 6.8, 6.2, 0, 0, TAU); g.fill();
+    g.fillStyle = '#6E3F18'; g.beginPath(); g.ellipse(x, y, 6.2, 5.6, 0, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(38,18,6,.75)'; g.beginPath(); g.ellipse(x - 1, y - 1, 3.6, 3.2, 0, 0, TAU); g.fill();
+  });
+}
+// chocolate top: diagonal ridges with rows of scalloped cups between them
+function chocTop(g, base, light, dark, R){
+  biscuitPath(g, 2.1, R); g.save(); g.clip();
+  const grad = g.createRadialGradient(-80, -90, 10, 0, 0, R);
+  grad.addColorStop(0, light); grad.addColorStop(.55, base); grad.addColorStop(1, dark);
+  g.fillStyle = grad; g.fillRect(-R, -R, R * 2, R * 2);
+  g.save(); g.rotate(-.42);
+  const band = 74, cell = 60; // about seven ridges across, seven or eight cups per row, as on the real biscuit
+  for (let y = -R * 1.4; y < R * 1.4; y += band){
+    for (let x = -R * 1.4; x < R * 1.4; x += cell){
+      // each cup is an arch: a soft bulge, a dark curve down its left side, a thin lit rim on the right
+      const cx = x + cell / 2, top = y + 4, bot = y + band - 2;
+      const rg = g.createRadialGradient(cx + cell * .14, top + band * .4, 2, cx, top + band * .5, cell * .62);
+      rg.addColorStop(0, light); rg.addColorStop(1, base);
+      g.globalAlpha = .75; g.fillStyle = rg; g.fillRect(x, y, cell, band);
+      g.globalAlpha = .7; g.strokeStyle = dark; g.lineWidth = 8;
+      g.beginPath(); g.arc(cx + cell * .1, top + band * .66, cell * .44, Math.PI * .95, Math.PI * 1.6); g.stroke();
+      g.globalAlpha = .5; g.strokeStyle = light; g.lineWidth = 3;
+      g.beginPath(); g.arc(cx + cell * .1, top + band * .66, cell * .4, Math.PI * 1.72, Math.PI * 2.12); g.stroke();
+      g.globalAlpha = .45; g.strokeStyle = dark; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(x + 1, top + band * .35); g.quadraticCurveTo(x - 2, bot - band * .15, x + 2, bot); g.stroke();
+      g.globalAlpha = 1;
+    }
+    g.globalAlpha = .7; g.strokeStyle = dark; g.lineWidth = 6;
+    g.beginPath(); g.moveTo(-R * 1.5, y + 3); g.lineTo(R * 1.5, y + 3); g.stroke();
+    g.globalAlpha = .8; g.strokeStyle = light; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(-R * 1.5, y - 2); g.lineTo(R * 1.5, y - 2); g.stroke();
+    g.globalAlpha = 1;
+  }
+  g.restore();
+  const eg = g.createRadialGradient(0, 0, R * .8, 0, 0, R);
+  eg.addColorStop(0, 'rgba(0,0,0,0)'); eg.addColorStop(1, 'rgba(0,0,0,.3)');
+  g.fillStyle = eg; g.fillRect(-R, -R, R * 2, R * 2);
+  const gl = g.createRadialGradient(-90, -110, 5, -90, -110, 210);
+  gl.addColorStop(0, 'rgba(255,255,255,.16)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gl; g.fillRect(-R, -R, R * 2, R * 2);
+  g.restore();
+}
+const CHOC = {
+  milk: ['#9A5C3B', '#C88E6A', '#5E3420'],
+  dark: ['#47291C', '#6B4433', '#21120A'],
+  caramel: ['#9A5C3B', '#C88E6A', '#5E3420'],
+  white: ['#E9DCC2', '#FAF2E2', '#BCA680'],
+  pink: ['#E3A0B0', '#F5C8D3', '#B26C7E'],
+  gold: ['#D29E4C', '#EDC97E', '#93641F'],
+  serious: ['#6A3B22', '#946042', '#371B0E']
+};
+function makeFace(id){
+  const [c, g] = newTex(); const r = rng(id.length * 131 + id.charCodeAt(0));
+  wheat(g, r, id === 'light');
+  if (CHOC[id]){
+    if (id === 'caramel'){ biscuitPath(g, 3, 246); g.fillStyle = '#D99A3E'; g.fill(); }
+    chocTop(g, ...CHOC[id], id === 'caramel' ? 238 : id === 'serious' ? 246 : 243);
+  } else { stamp(g); holes(g); }
+  return c;
+}
+const TEXTURES = {};
+['original','dark','caramel','milk','white','pink','gold','serious','light','under'].forEach(id => TEXTURES[id] = makeFace(id));
+function drawThumbs(){ document.querySelectorAll('canvas.thumb').forEach((c, i) => {
+  const g = c.getContext('2d'), s = c.width;
+  g.clearRect(0, 0, s, s);
+  g.save(); g.translate(s / 2, s / 2);
+  const rr = s * .39;
+  g.translate(-rr * .05, -rr * .1);
+  dropShadow(g, 0, 0, rr, rr, 0, 1, 1);
+  g.save(); g.rotate(i * .9);
+  g.drawImage(TEXTURES[c.dataset.id], -s * .4, -s * .4, s * .8, s * .8);
+  g.restore();
+  g.restore();
+}); }
+drawThumbs();
+
+/* ---------- swap in the photographs once they load ---------- */
+// cut a round biscuit out of a photo on a plain background, centred at radius TR
+function cutout(img, S = TEX){
+  const s = 200, c = document.createElement('canvas'); c.width = c.height = s;
+  const g = c.getContext('2d', {willReadFrequently: true});
+  g.drawImage(img, 0, 0, s, s);
+  const d = g.getImageData(0, 0, s, s).data, bg = [d[0], d[1], d[2]];
+  let minX = s, minY = s, maxX = 0, maxY = 0;
+  for (let y = 0; y < s; y++) for (let x = 0; x < s; x++){
+    const i = (y * s + x) * 4;
+    if (Math.abs(d[i] - bg[0]) + Math.abs(d[i + 1] - bg[1]) + Math.abs(d[i + 2] - bg[2]) > 95){
+      if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+  }
+  const sc = img.naturalWidth / s;
+  const cx = (minX + maxX + 1) / 2 * sc, cy = (minY + maxY + 1) / 2 * sc;
+  const r = Math.max(maxX - minX + 1, maxY - minY + 1) / 2 * sc;
+  const t = document.createElement('canvas'); t.width = t.height = S;
+  const tg = t.getContext('2d'); tg.translate(S / 2, S / 2);
+  const TRs = TR * S / TEX, k = TRs / r;
+  tg.drawImage(img, -cx * k, -cy * k, img.naturalWidth * k, img.naturalHeight * k);
+  // flood the background in from the borders so the crumbly outline is kept exactly,
+  // then un-mix the background colour out of the anti-aliased edge pixels
+  const id = tg.getImageData(0, 0, S, S), px = id.data, n = S * S;
+  const dist = i => Math.abs(px[i * 4] - bg[0]) + Math.abs(px[i * 4 + 1] - bg[1]) + Math.abs(px[i * 4 + 2] - bg[2]);
+  const isBg = new Uint8Array(n), stack = [];
+  for (let i = 0; i < S; i++) stack.push(i, n - 1 - i, i * S, i * S + S - 1);
+  while (stack.length){
+    const i = stack.pop();
+    if (isBg[i] || (px[i * 4 + 3] > 10 && dist(i) >= 110)) continue;
+    isBg[i] = 1;
+    const x = i % S, y = (i / S) | 0;
+    if (x > 0) stack.push(i - 1); if (x < S - 1) stack.push(i + 1);
+    if (y > 0) stack.push(i - S); if (y < S - 1) stack.push(i + S);
+  }
+  for (let i = 0; i < n; i++){
+    if (isBg[i]){ px[i * 4 + 3] = 0; continue; }
+    const x = i % S, y = (i / S) | 0;
+    if ((x > 0 && isBg[i - 1]) || (x < S - 1 && isBg[i + 1]) || (y > 0 && isBg[i - S]) || (y < S - 1 && isBg[i + S])){
+      const a = clamp((dist(i) - 110) / 110, .35, 1);
+      // borrow the colour of the crust a few pixels further in, so no pale fringe is left round the edge
+      const vx = S / 2 - x, vy = S / 2 - y, vl = Math.hypot(vx, vy) || 1;
+      const j = ((y + Math.round(vy / vl * 3)) * S + (x + Math.round(vx / vl * 3))) * 4;
+      for (let ch = 0; ch < 3; ch++) px[i * 4 + ch] = px[j + ch];
+      px[i * 4 + 3] = Math.round(255 * a);
+    }
+  }
+  tg.putImageData(id, 0, 0);
+  return t;
+}
+// recolour a photo (for the coatings we did not photograph), keeping its shape and shading
+function tint(src, color, mode, inner){
+  const [t, g] = newTex();
+  g.drawImage(src, -TEX / 2, -TEX / 2);
+  g.save(); g.beginPath(); g.arc(0, 0, TR * inner, 0, TAU); g.clip();
+  g.globalCompositeOperation = mode; g.fillStyle = color; g.fillRect(-TEX / 2, -TEX / 2, TEX, TEX);
+  g.restore();
+  g.globalCompositeOperation = 'destination-in'; g.drawImage(src, -TEX / 2, -TEX / 2);
+  return t;
+}
+const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jpg', white: 'img/white.jpg'};
+Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
+  const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
+}))).then(list => {
+  const P = Object.fromEntries(list.map(([id, im]) => [id, cutout(im)]));
+  Object.assign(TEXTURES, {
+    under: P.under, original: P.under, milk: P.milk, dark: P.dark, white: P.white,
+    caramel: tint(P.milk, '#FFE6C4', 'multiply', .93),
+    serious: tint(P.milk, '#B88A74', 'multiply', .95),
+    pink: tint(P.white, '#F3A6BA', 'multiply', .93),
+    gold: tint(P.white, '#E2B262', 'multiply', .93),
+    light: tint(P.under, 'rgba(255,238,210,.35)', 'screen', 1)
+  });
+  HI_UNDER = cutout(list.find(([id]) => id === 'under')[1], 1024);
+  CRUMB = crumbFromPhoto(HI_UNDER); RIM = null;
+  drawThumbs();
+}).catch(() => { /* keep the drawn biscuits */ });
+
+const PORES = (() => {
+  const r = rng(4242), out = [];
+  while (out.length < 110){
+    const x = (r() * 2 - 1) * .92, y = -.42 + r() * 1.34;
+    if (x * x + y * y > .86) continue;
+    out.push({x, y, s: .012 + r() * .018, k: y + r() * .45});
+  }
+  return out.sort((a, b) => b.k - a.k);
+})();
+
+/* ---------- layout measurement ---------- */
+let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
+const sections = [...document.querySelectorAll('[data-pose]')].map(el => ({el, name: el.dataset.pose, pin: el.classList.contains('pin'), top: 0, h: 0}));
+const SEC = Object.fromEntries(sections.map(s => [s.name, s]));
+let keys = [], SPOT = {}, PANEL_R = 0;
+function measure(){
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  narrow = W <= 820;
+  U = Math.min(W * (narrow ? .95 : .62), H * .6) / 100;
+  sections.forEach(s => { const r = s.el.getBoundingClientRect(); s.top = r.top + window.scrollY; s.h = s.el.offsetHeight; });
+  { const pr = SEC.dunk.el.querySelector('.panels').getBoundingClientRect(); PANEL_R = pr.right; }
+  SPOT = {};
+  sections.forEach(s => {
+    const id = s.el.dataset.spot; if (!id) return;
+    const r = document.getElementById(id).getBoundingClientRect();
+    SPOT[s.name] = {x: r.left + r.width / 2, y: r.top + window.scrollY + r.height / 2, r: id === 'slot' ? r.width * .39 : r.width / 2 * .9, hold: (+s.el.dataset.hold || 0) * H, rot: +s.el.dataset.rot || 0};
+  });
+  // pin the grid with its middle cell exactly at the centre of the screen
+  const flPin = document.getElementById('fl-pin'), slotEl = document.getElementById('slot');
+  const pr = flPin.getBoundingClientRect(), sr = slotEl.getBoundingClientRect();
+  const slotOff = sr.top + sr.height / 2 - pr.top;
+  const stickyTop = H / 2 - slotOff;
+  flPin.style.top = stickyTop + 'px';
+  const fs = SEC.flavours, padTop = parseFloat(getComputedStyle(fs.el).paddingTop);
+  const pinStart = fs.top + padTop - stickyTop;
+  const pinEnd = pinStart + fs.el.querySelector('.fl-spacer').offsetHeight;
+  keys = [];
+  sections.forEach(s => {
+    if (s.name === 'flavours'){ keys.push({at: Math.max(0, pinStart), name: s.name}); keys.push({at: pinEnd, name: s.name}); }
+    else if (s.pin){ keys.push({at: s.top, name: s.name}); keys.push({at: s.top + s.h - H, name: s.name}); }
+    else if (SPOT[s.name] && SPOT[s.name].hold){
+      // centre the slot on screen, and keep the biscuit in it for a while either side
+      const c = SPOT[s.name].y - H / 2, hold = SPOT[s.name].hold;
+      if (s.el.dataset.flip){ keys.push({at: Math.max(0, c - hold - +s.el.dataset.flip * H), name: s.name + '-in'}); }
+      keys.push({at: Math.max(0, c - hold), name: s.name}); keys.push({at: c + hold, name: s.name});
+    }
+    else keys.push({at: Math.max(0, (SPOT[s.name] ? SPOT[s.name].y : s.top + s.h / 2) - H / 2), name: s.name});
+  });
+  keys.sort((a, b) => a.at - b.at);
+}
+// local progress of a pinned section, and where its sticky frame sits on screen
+function pinState(s, y){
+  const end = s.top + s.h - H;
+  const q = clamp((y - s.top) / Math.max(1, end - s.top));
+  const top = y < s.top ? s.top - y : y > end ? end - y : 0;
+  return {q, top};
+}
+
+/* ---------- poses: where the biscuit sits for each section ---------- */
+function geomDunk(top, dd = 0){
+  // dd: 0 = biscuit hovering above the cup, 1 = biscuit half in the tea
+  const cx = W / 2;
+  const ry = top + H / 2 + lerp(30 * U, -2.9 * U, dd);
+  return {cx, ry, a: 30 * U, b: 23 * U, h: 34 * U, e: 5 * U, tea: ry + 5 * U};
+}
+function geomBite(top, m = 0){
+  // the mouth starts just above the biscuit and closes down over it
+  return {mx: W / 2, my: top + H / 2 - 34 * U * (1 - m), mw: 24 * U};
+}
+function pose(name, y){
+  const N = narrow;
+  // the plain side shows when sx > 0, the milk chocolate side when sx < 0
+  if (name === 'flavours' || name === 'flavours-in'){
+    return {x: W / 2, y: H / 2, r: SPOT.flavours.r, rot: 0, sx: name === 'flavours' ? -1 : 1};
+  }
+  if (SPOT[name]) return {x: W / 2, y: name === 'hero' ? H * .45 : H / 2, r: SPOT[name].r, rot: SPOT[name].rot, sx: name === 'method' ? -1 : 1};
+  switch (name){
+    case 'intro': return {x: W / 2, y: H / 2, r: Math.min(W * (narrow ? .78 : .4), H * .58, 520) / 2, rot: 0, sx: 1};
+    case 'dunk': return {x: W / 2, y: H / 2, r: 21 * U, rot: -.14, sx: 1};
+    case 'bite': case 'end': return {x: W / 2, y: H / 2, r: 21 * U, rot: 0, sx: 1};
+  }
+}
+function poseAt(y){
+  if (y <= keys[0].at) return pose(keys[0].name, y);
+  for (let i = 0; i < keys.length - 1; i++){
+    const a = keys[i], b = keys[i + 1];
+    if (y <= b.at){
+      const u = clamp((y - a.at) / Math.max(1, b.at - a.at));
+      const t = u; // even pace: the biscuit travels exactly as far as you scroll
+      const A = pose(a.name, y), B = pose(b.name, y);
+      return {x: lerp(A.x, B.x, t), y: lerp(A.y, B.y, t), r: lerp(A.r, B.r, t), rot: lerp(A.rot, B.rot, t), sx: lerp(A.sx, B.sx, t)};
+    }
+  }
+  return pose(keys[keys.length - 1].name, y);
+}
+
+/* ---------- drawing: biscuit ---------- */
+// The rim of a digestive: matte, sandy crumb, rounded over where it meets each face.
+// Its texture is wrapped onto the rim itself (an unrolled strip mapped round the edge in
+// small segments), so the crumb travels with the biscuit as it turns instead of sitting
+// still behind it like a mask.
+var HI_UNDER; // a sharper plain face for the close-ups
+var CRUMB; // var: assigned lazily on first turn, or built from the photo once it loads
+// a tile of real crumb: small patches of the face photo, skipping holes and lettering
+function crumbFromPhoto(tex){
+  // works on any size of face texture; patches are taken at the photo's own resolution
+  const Tw = tex.width, f = Tw / TEX;
+  const data = tex.getContext('2d').getImageData(0, 0, Tw, Tw).data;
+  const S = 360, P = 24, c = document.createElement('canvas'); c.width = c.height = S;
+  const h = c.getContext('2d'), r = rng(5);
+  const lum = (x, y) => { const i = ((y | 0) * Tw + (x | 0)) * 4; return data[i + 3] < 250 ? 0 : data[i] * .3 + data[i + 1] * .59 + data[i + 2] * .11; };
+  let placed = 0, tries = 0;
+  while (placed < 1200 && tries < 20000){
+    tries++;
+    const a = r() * TAU, d = (.2 + r() * .68) * TR * f, x = Tw / 2 + Math.cos(a) * d, y = Tw / 2 + Math.sin(a) * d;
+    let ok = true;
+    for (let yy = -P / 2; yy <= P / 2 && ok; yy += P / 4) for (let xx = -P / 2; xx <= P / 2; xx += P / 4){ const L = lum(x + xx, y + yy); if (L < 92 || L > 240){ ok = false; break; } }
+    if (!ok) continue;
+    const px = r() * S, py = r() * S, rot = r() * TAU;
+    for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]){
+      if (Math.abs(px + ox - S / 2) > S / 2 + P || Math.abs(py + oy - S / 2) > S / 2 + P) continue;
+      h.save(); h.translate(px + ox, py + oy); h.rotate(rot);
+      h.drawImage(tex, x - P / 2, y - P / 2, P, P, -P / 2, -P / 2, P, P); h.restore();
+    }
+    placed++;
+  }
+  return c;
+}
+// fallback crumb tile until the photo arrives
+function crumbTile(){
+  if (CRUMB) return CRUMB;
+  const c = document.createElement('canvas'); c.width = c.height = 180;
+  const h = c.getContext('2d'), r = rng(77);
+  h.fillStyle = '#CF9658'; h.fillRect(0, 0, 180, 180);
+  for (let i = 0; i < 6500; i++){
+    const x = r() * 180, y = r() * 180, k = r(), sz = .5 + r() * 1.5;
+    h.fillStyle = k < .5 ? `rgba(118,66,24,${.12 + r() * .25})` : k < .92 ? `rgba(240,196,132,${.1 + r() * .25})` : `rgba(74,38,10,${.3 + r() * .35})`;
+    h.fillRect(x, y, sz, sz * (.6 + r() * .8));
+  }
+  CRUMB = c; return c;
+}
+// The rim, unrolled, made from the biscuit's own photo: for every angle round the biscuit, the
+// crust just inside the face's edge at that same angle. Rows run from the front face (outer crust)
+// in toward the middle of the side (a little further in, lighter crumb) and back out to the far
+// face, so the side carries on seamlessly from the face it belongs to.
+var RIM;
+function rimStrip(){
+  if (RIM) return RIM;
+  const src = HI_UNDER || TEXTURES.under, S = src.width, Rs = TR * S / TEX;
+  const sd = src.getContext('2d').getImageData(0, 0, S, S).data;
+  const W = Math.round(TAU * Rs), H = Math.max(24, Math.round(Rs * .16)), PAD = 64;
+  const c = document.createElement('canvas'); c.width = W + PAD; c.height = H; c.turn = W;
+  const h = c.getContext('2d'), out = h.createImageData(W + PAD, H), od = out.data;
+  const at = (x, y, ch) => sd[((y | 0) * S + (x | 0)) * 4 + ch];
+  for (let v = 0; v < H; v++){
+    const t = v / (H - 1), mid = 1 - Math.abs(2 * t - 1);
+    const rho = Rs * (.95 - .1 * mid);
+    for (let u = 0; u < W + PAD; u++){
+      const th = (u % W) / W * TAU, fx = S / 2 + Math.cos(th) * rho, fy = S / 2 + Math.sin(th) * rho;
+      const x0 = Math.floor(fx), y0 = Math.floor(fy), ax = fx - x0, ay = fy - y0, o = (v * (W + PAD) + u) * 4;
+      for (let ch = 0; ch < 3; ch++){
+        const top = at(x0, y0, ch) * (1 - ax) + at(x0 + 1, y0, ch) * ax;
+        const bot = at(x0, y0 + 1, ch) * (1 - ax) + at(x0 + 1, y0 + 1, ch) * ax;
+        od[o + ch] = top * (1 - ay) + bot * ay;
+      }
+      od[o + 3] = 255;
+    }
+  }
+  h.putImageData(out, 0, 0);
+  // the side is a touch deeper and warmer than the face, which faces the light square on
+  h.globalCompositeOperation = 'multiply'; h.fillStyle = 'rgb(236,204,164)'; h.fillRect(0, 0, W + PAD, H);
+  h.globalCompositeOperation = 'source-over';
+  RIM = c; return c;
+}
+// The rim is not a flat band: in cross-section the side rolls round into the back face like a
+// pillow edge. Walk that curve (beta 0 = where the side leaves the front face, beta 90deg = flat
+// on the back face) and the visible half of the circle, mapping the wrapped crumb onto each patch,
+// shading each patch by how it faces the light.
+const RIM_ROUND = .06; // how far, as a share of the radius, the edge rolls in before the back face
+var RIMC; // offscreen layer the rim is assembled on before it goes onto the page
+function drawRim(g, R, d, dir, asx, uOff = 0, screenRot = 0){
+  const strip = rimStrip(), RW = strip.turn || strip.width, RH = strip.height;
+  const m = g.getTransform(), sc = Math.hypot(m.a, m.b);
+  const ext = R + d + 4, size = Math.ceil(ext * 2 * sc);
+  if (!RIMC) RIMC = document.createElement('canvas');
+  if (RIMC.width < size) RIMC.width = RIMC.height = size;
+  const o = RIMC.getContext('2d');
+  o.setTransform(1, 0, 0, 1, 0, 0); o.globalCompositeOperation = 'source-over'; o.globalAlpha = 1;
+  o.clearRect(0, 0, size, size);
+  o.setTransform(sc, 0, 0, sc, size / 2, size / 2);
+  // a little past the visible half on each side, so the tips taper into the outline instead of stopping short
+  const over = .45, t0 = (dir < 0 ? Math.PI / 2 : -Math.PI / 2) - over, N = 56, M = 7, span = Math.PI + over * 2;
+  const fOf = be => be < 0 ? 1 + be * .6 : 1 - RIM_ROUND * (1 - Math.cos(be));
+  const pt = (th, be) => {
+    const f = fOf(be);
+    return [asx * R * f * Math.cos(th) + dir * d * Math.sin(Math.max(0, be)), R * f * Math.sin(th)];
+  };
+  const secs = [];
+  for (let j = -1; j <= M; j++){
+    const be = j < 0 ? -.16 : Math.PI / 2 * j / M;
+    secs.push([dir * d * Math.sin(Math.max(0, be)), fOf(be)]);
+  }
+  const outline = () => {
+    // one path, every shape wound clockwise, so they add up into a single solid outline
+    o.beginPath();
+    for (const [cx, f] of secs){ o.moveTo(cx + asx * R * f, 0); o.ellipse(cx, 0, Math.max(.01, asx * R * f), R * f, 0, 0, TAU); }
+    for (let j = 0; j < secs.length - 1; j++){
+      let [c0, f0] = secs[j], [c1, f1] = secs[j + 1];
+      if (c1 < c0){ [c0, c1] = [c1, c0]; [f0, f1] = [f1, f0]; }
+      o.moveTo(c0, -R * f0); o.lineTo(c1, -R * f1); o.lineTo(c1, R * f1); o.lineTo(c0, R * f0); o.closePath();
+    }
+  };
+  // 0. a crust-coloured base, so any hairline between patches shows crumb rather than the page
+  o.fillStyle = '#B47D45'; outline(); o.fill();
+  // 1. the crumb, wrapped round the curved side in small patches (texture only, no shading yet)
+  for (let j = M - 1; j >= -1; j--){
+    const ba = j < 0 ? -.16 : Math.PI / 2 * j / M, bb = j < 0 ? 0 : Math.PI / 2 * (j + 1) / M;
+    const va = RH * Math.max(0, j) / M, vh = RH / M;
+    for (let i = 0; i < N; i++){
+      const ta = t0 + span * i / N, tb = t0 + span * (i + 1) / N;
+      const [x0, y0] = pt(ta, ba), [x1, y1] = pt(tb, ba), [x2, y2] = pt(ta, bb);
+      // uOff turns the tilt frame's angle back into the biscuit's own, so the crumb stays put on the
+      // biscuit while the direction of the tilt swings round between labels
+      const u = ((((ta + uOff) / TAU) % 1) + 1) % 1 * RW, du = (tb - ta) / TAU * RW;
+      const sw = Math.min(du + 4, strip.width - u), sh = Math.min(vh + 3, RH - va);
+      o.save();
+      o.transform((x1 - x0) / du, (y1 - y0) / du, (x2 - x0) / vh, (y2 - y0) / vh, x0, y0);
+      o.drawImage(strip, u, va, sw, sh, 0, 0, sw, sh);
+      o.restore();
+    }
+  }
+  // 2. trim to the true outline: the union of the rim's cross-sections, a smooth curve with no spikes
+  o.globalCompositeOperation = 'destination-in';
+  // the union of the cross-sections (each squashes to a line near edge-on, so the bands between
+  // neighbours are filled too, or the outline would break into slivers)
+  o.fillStyle = '#000'; // the mask must be opaque
+  outline(); o.fill();
+  // 3. light it: the key light comes from the upper left of the screen, so the stretch of edge
+  // turned toward it catches the light and the stretch turned away falls into shade. This layer is
+  // drawn turned by screenRot, so turn the light into the same frame.
+  o.globalCompositeOperation = 'source-atop';
+  const la = -screenRot, L0x = -.6, L0y = -.8;
+  const lx = L0x * Math.cos(la) - L0y * Math.sin(la), ly = L0x * Math.sin(la) + L0y * Math.cos(la);
+  const reach = R + d;
+  const lg = o.createLinearGradient(lx * reach, ly * reach, -lx * reach, -ly * reach);
+  lg.addColorStop(0, 'rgba(255,224,170,.2)'); lg.addColorStop(.3, 'rgba(255,224,170,.07)');
+  lg.addColorStop(.5, 'rgba(255,224,170,0)'); lg.addColorStop(.62, 'rgba(58,30,10,0)');
+  lg.addColorStop(1, 'rgba(58,30,10,.34)');
+  o.fillStyle = lg; o.fillRect(-ext, -ext, ext * 2, ext * 2);
+  // a soft fall-off right where the side curls round to the back face
+  const half = dir < 0 ? [Math.PI / 2, Math.PI * 1.5] : [-Math.PI / 2, Math.PI / 2];
+  const ba2 = Math.max(.01, asx * R * (1 - RIM_ROUND)), bR = R * (1 - RIM_ROUND);
+  o.strokeStyle = 'rgba(70,38,12,.045)';
+  for (let w = 5; w >= 1; w--){
+    o.lineWidth = d * .22 * w;
+    o.beginPath(); o.ellipse(dir * d, 0, ba2, bR, 0, half[0], half[1]); o.stroke();
+  }
+  // 4. onto the page
+  g.drawImage(RIMC, 0, 0, size, size, -size / 2 / sc, -size / 2 / sc, size / sc, size / sc);
+}
+// a version of the face whose outermost rim fades out, so it melts into the rounded side
+// (only on the side where the rim is; the near side keeps its crisp outline)
+const FEATHERED = new WeakMap(), FMASK = {};
+function featherMask(dir){
+  if (FMASK[dir]) return FMASK[dir];
+  const [m, g] = newTex();
+  const lin = g.createLinearGradient(-dir * TR * .3, 0, dir * TR * .3, 0);
+  lin.addColorStop(0, '#000'); lin.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = lin; g.fillRect(-TEX / 2, -TEX / 2, TEX, TEX);
+  g.globalCompositeOperation = 'lighter';
+  const rad = g.createRadialGradient(0, 0, TR * .93, 0, 0, TR * .99);
+  rad.addColorStop(0, '#000'); rad.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = rad; g.fillRect(-TEX / 2, -TEX / 2, TEX, TEX);
+  return (FMASK[dir] = m);
+}
+function featheredFace(face, dir){
+  let e = FEATHERED.get(face);
+  if (!e){ e = {}; FEATHERED.set(face, e); }
+  if (!e[dir]){
+    const [t, g] = newTex();
+    g.drawImage(face, -TEX / 2, -TEX / 2);
+    g.globalCompositeOperation = 'destination-in'; g.drawImage(featherMask(dir), -TEX / 2, -TEX / 2);
+    e[dir] = t;
+  }
+  return e[dir];
+}
+// a soft shadow on the page below a lifted biscuit: one tighter shadow and one wide, faint one,
+// cast down and to the right by the light from the upper left. The shape is drawn far off the
+// canvas and only its shadow is moved back into place, so just the shadow shows.
+function dropShadow(g, x, y, rx, ry, rot, strength, scale){
+  if (strength <= .01) return;
+  const far = 20000;
+  g.save();
+  g.fillStyle = '#000';
+  g.beginPath(); g.ellipse(x + far, y, Math.max(.01, rx * .96), ry * .96, rot, 0, TAU);
+  g.shadowColor = `rgba(14,0,2,${.72 * strength})`;
+  g.shadowBlur = ry * .36 * scale; g.shadowOffsetX = (ry * .06 - far) * scale; g.shadowOffsetY = ry * .15 * scale;
+  g.fill();
+  g.shadowColor = `rgba(14,0,2,${.35 * strength})`;
+  g.shadowBlur = ry * .9 * scale; g.shadowOffsetX = (ry * .1 - far) * scale; g.shadowOffsetY = ry * .3 * scale;
+  g.fill();
+  g.restore();
+}
+function drawBiscuit(b){
+  if (b.alpha <= .004 || b.r <= .5) return;
+  const asx0 = Math.max(.002, Math.abs(b.sx));
+  dropShadow(ctx, b.x, b.y, asx0 * b.r, b.r, b.rot + (b.axis || 0), (b.lift || 0) * b.alpha, DPR);
+  ctx.save();
+  ctx.globalAlpha = b.alpha;
+  ctx.translate(b.x, b.y);
+  ctx.rotate(b.rot + (b.axis || 0));
+  const asx = Math.max(.002, Math.abs(b.sx));
+  const k = b.r / TR;
+  if (asx < .985){
+    // turning: the rim (about 6 mm on a 67 mm biscuit) swings into view beside the face
+    const d = b.r * .13 * Math.sqrt(1 - asx * asx), dir = -Math.sign(b.sx || 1);
+    // turn about the middle of the biscuit's thickness: the visible face sits half the thickness
+    // in front of centre and the rim runs back to the far face. When the far face comes round to
+    // the front at the halfway point, everything is already in the same place, so nothing jumps.
+    ctx.translate(-dir * d / 2, 0);
+    if (d > .5) drawRim(ctx, b.r * .995, d, dir, asx, b.axis || 0, b.rot + (b.axis || 0));
+  }
+  ctx.scale(asx, 1);
+  ctx.rotate(-(b.axis || 0));
+  const sharp = b.tex === TEXTURES.under && HI_UNDER ? HI_UNDER : b.tex;
+  // nearly edge-on (the flip) the face's far edge melts into the rim; a moderate lean keeps the sharp photo
+  if (asx < .5) ctx.drawImage(featheredFace(b.tex, -Math.sign(b.sx || 1)), -TEX / 2 * k, -TEX / 2 * k, TEX * k, TEX * k);
+  else if (asx < .985) ctx.drawImage(sharp, -TEX / 2 * k, -TEX / 2 * k, TEX * k, TEX * k);
+  else if (b.tex === TEXTURES.under && HI_UNDER) ctx.drawImage(HI_UNDER, -TEX / 2 * k, -TEX / 2 * k, TEX * k, TEX * k);
+  else ctx.drawImage(b.tex, -TEX / 2 * k, -TEX / 2 * k, TEX * k, TEX * k);
+  if (b.tex2 && b.mix > 0){
+    ctx.save(); ctx.beginPath();
+    const rr = b.r * 1.04 * b.mix;
+    for (let a = 0; a <= TAU + .01; a += TAU / 60){
+      const w = rr * (1 + .06 * Math.sin(a * 7 + b.mix * 8) * (1 - b.mix));
+      a ? ctx.lineTo(Math.cos(a) * w, Math.sin(a) * w) : ctx.moveTo(w, 0);
+    }
+    ctx.closePath(); ctx.clip();
+    ctx.drawImage(b.tex2, -TEX / 2 * k, -TEX / 2 * k, TEX * k, TEX * k);
+    ctx.restore();
+  }
+  if (b.wet > 0){
+    ctx.save();
+    ctx.beginPath(); ctx.arc(0, 0, b.r * .995, 0, TAU); ctx.clip();
+    const wy = b.wetLine * b.r;
+    ctx.fillStyle = `rgba(74,38,12,${.16 + .42 * b.wet})`;
+    ctx.beginPath(); ctx.moveTo(-b.r, wy);
+    for (let x = -b.r; x <= b.r + 1; x += b.r / 14) ctx.lineTo(x, wy + Math.sin(x / b.r * 9 + 1.3) * b.r * .025);
+    ctx.lineTo(b.r, b.r); ctx.lineTo(-b.r, b.r); ctx.closePath(); ctx.fill();
+    const band = b.r * .14;
+    const gg = ctx.createLinearGradient(0, wy - band, 0, wy);
+    gg.addColorStop(0, 'rgba(74,38,12,0)'); gg.addColorStop(1, `rgba(74,38,12,${.22 * b.wet})`);
+    ctx.fillStyle = gg; ctx.fillRect(-b.r, wy - band, b.r * 2, band);
+    const sh = ctx.createLinearGradient(-b.r, 0, b.r, 0);
+    sh.addColorStop(.2, 'rgba(255,220,170,0)'); sh.addColorStop(.45, `rgba(255,220,170,${.10 * b.wet})`); sh.addColorStop(.7, 'rgba(255,220,170,0)');
+    ctx.fillStyle = sh; ctx.fillRect(-b.r, wy, b.r * 2, b.r * 2);
+    ctx.fillStyle = 'rgba(52,24,6,.6)';
+    for (let i = 0; i < b.pores; i++){ const q = PORES[i]; ctx.beginPath(); ctx.arc(q.x * b.r, q.y * b.r, q.s * b.r, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
+  ctx.restore();
+}
+function shadow(x, y, r, a){
+  if (a <= .01) return;
+  ctx.save(); ctx.globalAlpha = a;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, 'rgba(50,35,20,.22)'); g.addColorStop(1, 'rgba(50,35,20,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(x, y, r, r * .2, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+
+/* ---------- drawing: cup ---------- */
+function cupPath(G){
+  const {cx, ry, a, b, h, e} = G;
+  ctx.beginPath();
+  ctx.moveTo(cx - a, ry);
+  ctx.bezierCurveTo(cx - a, ry + h * .62, cx - b - 3 * U, ry + h, cx - b + 5 * U, ry + h);
+  ctx.lineTo(cx + b - 5 * U, ry + h);
+  ctx.bezierCurveTo(cx + b + 3 * U, ry + h, cx + a, ry + h * .62, cx + a, ry);
+  ctx.ellipse(cx, ry, a, e, 0, 0, Math.PI, false);
+  ctx.closePath();
+}
+function teaGrad(G){
+  const tg = ctx.createLinearGradient(G.cx - G.a, 0, G.cx + G.a, 0);
+  tg.addColorStop(0, '#7E3D14'); tg.addColorStop(.45, '#B0612A'); tg.addColorStop(1, '#7A3A12');
+  return tg;
+}
+function drawCupBack(G){
+  const {cx, ry, a, e, tea} = G;
+  shadow(cx, ry + 39 * U, 52 * U, 1);
+  ctx.fillStyle = COL.cup; ctx.strokeStyle = COL.shade; ctx.lineWidth = .5 * U;
+  ctx.beginPath(); ctx.ellipse(cx, ry + 35 * U, 46 * U, 8 * U, 0, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = .5 * U;
+  ctx.beginPath(); ctx.ellipse(cx, ry + 35 * U, 43 * U, 7 * U, 0, 0, TAU); ctx.stroke();
+  ctx.fillStyle = COL.shade; ctx.globalAlpha = .45;
+  ctx.beginPath(); ctx.ellipse(cx, ry + 34.4 * U, 27 * U, 4.2 * U, 0, 0, TAU); ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = COL.shade; ctx.lineWidth = 5.4 * U;
+  ctx.beginPath(); ctx.arc(cx + a + 1 * U, ry + 13 * U, 8.5 * U, -1.25, 1.2); ctx.stroke();
+  ctx.strokeStyle = COL.cup; ctx.lineWidth = 3.8 * U;
+  ctx.beginPath(); ctx.arc(cx + a + 1 * U, ry + 13 * U, 8.5 * U, -1.25, 1.2); ctx.stroke();
+  ctx.fillStyle = COL.shade;
+  ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = teaGrad(G);
+  ctx.beginPath(); ctx.ellipse(cx, tea, a - .7 * U, e * .92, 0, 0, TAU); ctx.fill();
+}
+function teaFront(G, alpha){
+  if (alpha <= 0) return;
+  const {cx, a, e, tea} = G;
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = teaGrad(G);
+  ctx.beginPath(); ctx.ellipse(cx, tea, a - .7 * U, e * .92, 0, 0, Math.PI, false); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,215,160,.18)';
+  ctx.beginPath(); ctx.ellipse(cx - a * .35, tea - e * .2, a * .25, e * .22, 0, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+function clipTea(G){
+  cupPath(G); ctx.clip();
+  ctx.beginPath(); ctx.rect(G.cx - G.a - 2, G.tea, G.a * 2 + 4, G.h + 4 * U); ctx.clip();
+}
+function teaBody(G, c){
+  if (c <= 0) return;
+  ctx.save(); clipTea(G);
+  const g = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h);
+  g.addColorStop(0, `rgba(176,96,40,${.42 * c})`); g.addColorStop(1, `rgba(96,44,12,${.72 * c})`);
+  ctx.fillStyle = g; ctx.fillRect(G.cx - G.a, G.tea, G.a * 2, G.h);
+  ctx.restore();
+}
+function drawCupFront(G, c){
+  const {cx, ry, a, e} = G;
+  ctx.save();
+  ctx.globalAlpha = 1 - .9 * c;
+  const g = ctx.createLinearGradient(cx - a, 0, cx + a, 0);
+  g.addColorStop(0, COL.shade); g.addColorStop(.32, COL.cup); g.addColorStop(.55, COL.cup); g.addColorStop(1, COL.shade);
+  ctx.fillStyle = g; cupPath(G); ctx.fill();
+  ctx.save(); cupPath(G); ctx.clip();
+  ctx.strokeStyle = COL.gold;
+  ctx.lineWidth = .9 * U; ctx.beginPath(); ctx.ellipse(cx, ry + 7.5 * U, a, e, 0, 0, Math.PI); ctx.stroke();
+  ctx.lineWidth = .3 * U; ctx.beginPath(); ctx.ellipse(cx, ry + 9.4 * U, a, e, 0, 0, Math.PI); ctx.stroke();
+  ctx.restore();
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle = c > 0 ? COL.ink : COL.shade;
+  ctx.globalAlpha = c > 0 ? .25 + .45 * c : .9;
+  ctx.lineWidth = (c > 0 ? .3 : .35) * U;
+  if (c > 0) ctx.setLineDash([1.4 * U, 1.1 * U]);
+  cupPath(G); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = COL.cup; ctx.lineWidth = 1.1 * U;
+  ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, Math.PI, TAU); ctx.stroke();
+  ctx.globalAlpha = 1 - .6 * c;
+  ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, 0, Math.PI); ctx.stroke();
+  ctx.strokeStyle = COL.gold; ctx.lineWidth = .25 * U; ctx.globalAlpha = (1 - .6 * c) * .9;
+  ctx.beginPath(); ctx.ellipse(cx, ry, a + .5 * U, e + .25 * U, 0, 0, TAU); ctx.stroke();
+  ctx.restore();
+}
+function steam(G, t, alpha){
+  if (alpha <= .01) return;
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = 1.1 * U;
+  for (let k = 0; k < 3; k++){
+    const x0 = G.cx + (k - 1) * 10 * U, base = G.ry - 3 * U, len = 22 * U;
+    const ph = reduceMotion ? 0 : t * 1.1 + k * 2.1;
+    const gr = ctx.createLinearGradient(0, base, 0, base - len);
+    gr.addColorStop(0, 'rgba(160,145,125,0)'); gr.addColorStop(.35, `rgba(160,145,125,${.4 * alpha})`); gr.addColorStop(1, 'rgba(160,145,125,0)');
+    ctx.strokeStyle = gr; ctx.beginPath();
+    for (let s = 0; s <= 24; s++){ const y = base - s / 24 * len; const x = x0 + Math.sin(ph + s * .42) * 2.2 * U * (s / 24 + .3); s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ---------- drawing: face ---------- */
+function mouthInterior(mx, my, mw, up, dn){
+  ctx.beginPath(); ctx.moveTo(mx - mw, my);
+  ctx.quadraticCurveTo(mx, my - 2 * up, mx + mw, my);
+  ctx.quadraticCurveTo(mx, my + 2 * dn, mx - mw, my);
+  ctx.closePath();
+}
+function drawFace(F){
+  const {mx, my, mw, up, dn} = F;
+  const skin = ctx.createRadialGradient(mx - 22 * U, my - 48 * U, 6 * U, mx, my - 30 * U, 85 * U);
+  skin.addColorStop(0, '#E7B592'); skin.addColorStop(1, '#C3845F');
+  ctx.fillStyle = skin; ctx.beginPath(); ctx.ellipse(mx, my - 40 * U, 64 * U, 70 * U, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = 'rgba(214,110,100,.22)';
+  ctx.beginPath(); ctx.ellipse(mx - 38 * U, my - 16 * U, 13 * U, 8 * U, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(mx + 38 * U, my - 16 * U, 13 * U, 8 * U, 0, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,60,35,.45)'; ctx.lineWidth = 1 * U; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(mx - 9 * U, my - 24 * U); ctx.quadraticCurveTo(mx - 6 * U, my - 19 * U, mx, my - 20 * U); ctx.quadraticCurveTo(mx + 6 * U, my - 19 * U, mx + 9 * U, my - 24 * U); ctx.stroke();
+  ctx.fillStyle = 'rgba(120,60,35,.35)';
+  ctx.beginPath(); ctx.ellipse(mx - 4.5 * U, my - 22 * U, 2.2 * U, 1.2 * U, .3, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(mx + 4.5 * U, my - 22 * U, 2.2 * U, 1.2 * U, -.3, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(150,80,50,.25)'; ctx.lineWidth = .7 * U;
+  ctx.beginPath(); ctx.moveTo(mx - 2.4 * U, my - 17 * U - up * .5); ctx.lineTo(mx - 2.8 * U, my - 9 * U - up * .7); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(mx + 2.4 * U, my - 17 * U - up * .5); ctx.lineTo(mx + 2.8 * U, my - 9 * U - up * .7); ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,60,35,.25)';
+  ctx.beginPath(); ctx.arc(mx, my + 14 * U + dn * .8, 7 * U, .5, Math.PI - .5); ctx.stroke();
+  mouthInterior(mx, my, mw, up, dn);
+  ctx.fillStyle = '#3A0E16'; ctx.fill();
+  if (up + dn > .3 * U){
+    ctx.save(); mouthInterior(mx, my, mw, up, dn); ctx.clip();
+    ctx.fillStyle = '#C25A63';
+    ctx.beginPath(); ctx.ellipse(mx, my + dn * 1.15, mw * .55, dn * .7, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#F4EFE4';
+    ctx.fillRect(mx - mw * .62, my - up * 1.6, mw * 1.24, up * .95);
+    ctx.strokeStyle = 'rgba(120,100,90,.35)'; ctx.lineWidth = .35 * U;
+    for (let i = -3; i <= 3; i++){ const x = mx + i * mw * .17; ctx.beginPath(); ctx.moveTo(x, my - up * 1.6); ctx.lineTo(x, my - up * .66); ctx.stroke(); }
+    ctx.restore();
+  }
+}
+function drawLips(F){
+  const {mx, my, mw, up, dn} = F;
+  const lu = up * .75, ld = dn * .75;
+  ctx.fillStyle = '#B2434C';
+  ctx.beginPath(); ctx.moveTo(mx - mw, my);
+  ctx.bezierCurveTo(mx - mw * .7, my - 5 * U - lu, mx - mw * .38, my - 9 * U - lu, mx - mw * .16, my - 8.6 * U - lu);
+  ctx.quadraticCurveTo(mx - mw * .05, my - 8.6 * U - lu, mx, my - 6.8 * U - lu);
+  ctx.quadraticCurveTo(mx + mw * .05, my - 8.6 * U - lu, mx + mw * .16, my - 8.6 * U - lu);
+  ctx.bezierCurveTo(mx + mw * .38, my - 9 * U - lu, mx + mw * .7, my - 5 * U - lu, mx + mw, my);
+  ctx.quadraticCurveTo(mx, my - 2 * up + .8 * U, mx - mw, my);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#C04F57';
+  ctx.beginPath(); ctx.moveTo(mx - mw, my);
+  ctx.quadraticCurveTo(mx, my + 2 * dn - .4 * U, mx + mw, my);
+  ctx.bezierCurveTo(mx + mw * .62, my + 11 * U + ld, mx - mw * .62, my + 11 * U + ld, mx - mw, my);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,210,210,.28)';
+  ctx.beginPath(); ctx.ellipse(mx - mw * .12, my + dn + 4.4 * U + ld * .3, mw * .3, 1.4 * U, 0, 0, TAU); ctx.fill();
+  ctx.fillStyle = 'rgba(70,15,20,.6)';
+  ctx.beginPath(); ctx.arc(mx - mw, my, .7 * U, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(mx + mw, my, .7 * U, 0, TAU); ctx.fill();
+}
+function label(x1, y1, x2, y2, text){
+  ctx.save();
+  ctx.strokeStyle = COL.ink; ctx.fillStyle = COL.ink; ctx.globalAlpha *= .8;
+  ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(x1, y1, 2.5, 0, TAU); ctx.fill();
+  ctx.font = 'italic 400 17px "Cormorant Garamond", Garamond, serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, x2 + 8, y2);
+  ctx.restore();
+}
+
+/* ---------- DOM bits ---------- */
+const panelsOf = name => [...SEC[name].el.querySelectorAll('.panel')].map(el => ({el, a: +el.dataset.a, b: +el.dataset.b}));
+const PANELS = {dunk: panelsOf('dunk'), bite: panelsOf('bite')};
+function fadePanels(list, q){
+  for (const k of list){
+    const o = Math.min(k.a <= 0 ? 1 : seg(q, k.a, k.a + .03), k.b >= 1 ? 1 : 1 - seg(q, k.b - .03, k.b));
+    k.el.style.opacity = o.toFixed(3);
+    k.el.style.visibility = o > .01 ? 'visible' : 'hidden';
+    k.el.style.transform = `translateY(${((1 - o) * 14).toFixed(1)}px)`;
+  }
+}
+const NOTES = [...document.querySelectorAll('.an-note')].map(el => ({el, ax: +el.dataset.ax, ay: +el.dataset.ay, zoom: +el.dataset.zoom || 2.5, tilt: +el.dataset.tilt || 0, axis: +el.dataset.axis || 0, side: el.dataset.side === 'left' ? -1 : 1, lab: el.querySelector('.label')}));
+const anHead = document.getElementById('an-head');
+// the tour: overview, then each feature in turn (index), then back out (-1)
+// each zoom or move now takes about a full screen of scrolling
+const AN_STOPS = [[0, -1], [.05, -1], [.21, 0], [.3, 0], [.45, 1], [.54, 1], [.69, 2], [.78, 2], [.95, -1], [1, -1]];
+const AN_HOLD = [[.21, .3], [.45, .54], [.69, .78]];
+function anatomyView(q){
+  const st = (i, j) => i < 0 ? {ax: 0, ay: 0, Z: 1, tilt: 0, axis: j >= 0 ? NOTES[j].axis : 0, tx: W / 2, ty: H / 2}
+    // each feature gets its own size: close on a hole, pulled back for the whole stamp, closest on the crumb
+    : {ax: NOTES[i].ax, ay: NOTES[i].ay, Z: NOTES[i].zoom * (narrow ? .85 : 1), tilt: NOTES[i].tilt, axis: NOTES[i].axis, tx: narrow ? W / 2 : W / 2 - NOTES[i].side * W * .14, ty: narrow ? H * .36 : H / 2};
+  for (let i = 0; i < AN_STOPS.length - 1; i++){
+    const [qa, ia] = AN_STOPS[i], [qb, ib] = AN_STOPS[i + 1];
+    if (q <= qb){
+      // (an untilted end borrows the other end's tilt direction, so only the amount of tilt changes)
+      const u = clamp((q - qa) / Math.max(1e-6, qb - qa)), t = .5 - .5 * Math.cos(Math.PI * u), A = st(ia, ib), B = st(ib, ia); // gentle, even ease
+      return {ax: lerp(A.ax, B.ax, t), ay: lerp(A.ay, B.ay, t), Z: lerp(A.Z, B.Z, t), tilt: lerp(A.tilt, B.tilt, t), axis: lerp(A.axis, B.axis, t), tx: lerp(A.tx, B.tx, t), ty: lerp(A.ty, B.ty, t)};
+    }
+  }
+  return st(-1, -1);
+}
+// where a point on the face (in radii) lands on screen, for a biscuit spun by rot and tilted
+// away from the camera across the direction axis (sx = how much of its width survives the tilt)
+function faceToScreen(ax, ay, rot, axis, sx){
+  const ca = Math.cos(-axis), sa = Math.sin(-axis);
+  let x = ax * ca - ay * sa, y = ax * sa + ay * ca;
+  x *= sx;
+  const cb = Math.cos(rot + axis), sb = Math.sin(rot + axis);
+  return [x * cb - y * sb, x * sb + y * cb];
+}
+const rTime = document.getElementById('r-time'), rSoak = document.getElementById('r-soak');
+let lastRead = '';
+
+// Lenis moves the page and we redraw in the same animation frame, so the biscuit never drifts from the text
+const lenis = (!reduceMotion && window.Lenis) ? new window.Lenis({lerp: .12, wheelMultiplier: .9, smoothWheel: true}) : null;
+function goTo(top){ lenis ? lenis.scrollTo(top, {duration: 1.6}) : window.scrollTo({top, behavior: reduceMotion ? 'auto' : 'smooth'}); }
+function scrollToSection(name, offset = 0){
+  const s = SEC[name];
+  const k = keys.find(k => k.name === name);
+  goTo((k ? k.at : s.top) + offset);
+}
+document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => scrollToSection(b.dataset.go)));
+document.getElementById('again').addEventListener('click', () => goTo(0));
+
+/* ---------- frame ---------- */
+function frame(y, t){
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const P = poseAt(y);
+  const an = pinState(SEC.intro, y);
+  const dk = pinState(SEC.dunk, y);
+  const bt = pinState(SEC.bite, y);
+
+  /* the plain biscuit turns milk chocolate as it lands in its slot */
+  const mix = 0;
+
+  /* dunk timings (local to the pinned dunk section) */
+  const q = dk.q;
+  const d = ease(seg(q, .04, .16));
+  const c = ease(seg(q, .17, .24)) * (1 - ease(seg(q, .65, .72)));
+  const zIn = ease(seg(q, .16, .24)) * (1 - ease(seg(q, .66, .74)));
+  const ts = seg(q, .24, .62), sf = Math.sqrt(ts);
+  const l = ease(seg(q, .72, .86));
+  const G = geomDunk(dk.top, d * (1 - l));
+  const cupVisible = G.ry - 12 * U < H && G.ry + 45 * U > 0;
+
+  /* bite timings */
+  const b = bt.q;
+  const m2 = seg(b, .25, .6), m2e = eo(m2);
+  const M = geomBite(bt.top, m2e);
+  const faceVisible = M.my - 110 * U < H && M.my + 30 * U > 0;
+  const open = ease(seg(b, .08, .25)) * (1 - ease(seg(b, .6, .72)));
+  const chew = b > .72 && b < .97 && !reduceMotion ? Math.max(0, Math.sin(t * 8)) * .9 * U : 0;
+  const F = {mx: M.mx, my: M.my, mw: M.mw, up: open * 8 * U, dn: open * 10 * U + chew};
+
+  /* biscuit */
+  const float = reduceMotion ? 0 : Math.sin(t * 1.3) * .7 * U * (1 - zIn);
+  // always dead centre of the screen; only its size, turn and coating change
+  let bx = P.x, by = P.y + float * (1 - d * (1 - l)) * (1 - m2e);
+  let br = P.r * (1 + .08 * (1 - Math.abs(P.sx))), brot = P.rot;
+  // the anatomy tour: zoom in so each feature sits beside its note
+  const AV = an.top === 0 ? anatomyView(an.q) : null;
+  let tiltSx = 1, tiltAxis = 0;
+  if (AV && (AV.Z > 1.0001 || AV.tilt > 1e-4)){
+    // lean the biscuit back in 3D about the feature, keeping the feature where the camera wants it
+    br = P.r * AV.Z; tiltSx = Math.cos(AV.tilt); tiltAxis = AV.axis;
+    const [ox, oy] = faceToScreen(AV.ax, AV.ay, brot, tiltAxis, tiltSx);
+    bx = AV.tx - br * ox; by = AV.ty - br * oy;
+  }
+  br = lerp(br, 5.5 * U, m2e);
+  const alpha = 1 - seg(b, .56, .62);
+  const sx = P.sx * tiltSx;
+  const B = {
+    x: bx, y: by, r: br, rot: brot, sx, axis: tiltAxis, alpha,
+    tex: sx < 0 ? TEXTURES.milk : TEXTURES.under,
+    tex2: null, mix: 0,
+    wet: q > .08 ? Math.max(.12, sf) : 0,
+    wetLine: -.1 - .32 * sf,
+    pores: Math.floor(sf * PORES.length)
+  };
+  const inMouth = m2 > .42;
+  const behindCup = cupVisible && q > .05 && l < .95;
+
+  // soft shadow while it floats over the page
+  const shA = clamp((G.ry - H * .9) / (H * .5)) * (1 - zIn);
+  B.lift = shA;
+
+  /* cup scene with camera zoom */
+  // zoom in only as far as the text panel on the left allows
+  const panelR = narrow ? 0 : PANEL_R;
+  const zMax = narrow ? .3 : clamp((W / 2 - panelR - 24) / (31 * U) - 1, 0, .5);
+  const z = 1 + zMax * zIn;
+  const fx = W / 2, fy = H / 2;
+  ctx.save();
+  ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
+  if (cupVisible){
+    drawCupBack(G);
+    steam(G, t, (1 - c) * (1 - d * (1 - l)));
+    if (behindCup && !faceVisible) drawBiscuit(B);
+    if (d > 0 && l < .2) teaFront(G, 1 - c);
+    teaBody(G, c);
+    if (c > .01){
+      ctx.save(); clipTea(G); ctx.globalAlpha = c;
+      const bottom = G.ry + G.h - 2 * U;
+      const cos = Math.cos(B.rot), sin = Math.sin(B.rot);
+      const tt = reduceMotion ? 0 : t;
+      for (let i = 0; i < 26; i++){
+        const ph = (tt * .32 + hash(i)) % 1;
+        const sxp = G.cx + (hash(i + 50) - .5) * 2 * (G.a - 5 * U);
+        const pq = PORES[(B.pores + i * 3) % PORES.length];
+        const qx = B.x + B.r * (pq.x * cos - pq.y * sin), qy = B.y + B.r * (pq.x * sin + pq.y * cos);
+        const e = ease(ph);
+        const x = lerp(sxp, qx, e) + Math.sin(ph * 9 + i) * 1.2 * U * (1 - e);
+        const yb = lerp(bottom, qy, e);
+        const rad = (.6 + hash(i + 9) * .9) * U * (1 - seg(ph, .78, 1)) * (.4 + .6 * (1 - sf * .5));
+        if (rad <= .05) continue;
+        ctx.strokeStyle = 'rgba(255,236,205,.75)'; ctx.lineWidth = .28 * U;
+        ctx.fillStyle = 'rgba(255,225,180,.12)';
+        ctx.beginPath(); ctx.arc(x, yb, rad, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.75)';
+        ctx.beginPath(); ctx.arc(x - rad * .35, yb - rad * .35, rad * .25, 0, TAU); ctx.fill();
+      }
+      for (let i = 0; i < 12; i++){
+        const ph = (tt * .22 + hash(i + 200)) % 1;
+        const x = G.cx + (hash(i + 300) - .5) * 2 * (G.a - 4 * U) + Math.sin(ph * 12 + i) * .8 * U;
+        const yb = lerp(bottom, G.tea + 1 * U, ph);
+        ctx.strokeStyle = 'rgba(255,236,205,.5)'; ctx.lineWidth = .22 * U;
+        ctx.beginPath(); ctx.arc(x, yb, (.35 + hash(i + 400) * .5) * U, 0, TAU); ctx.stroke();
+      }
+      for (let i = 0; i < 9; i++){
+        const ph = (tt * .05 + hash(i + 600)) % 1;
+        const x = G.cx + (hash(i + 700) - .5) * 1.6 * G.a + Math.sin(tt * .7 + i) * 1.5 * U;
+        const yb = lerp(G.tea + 6 * U, bottom, ph * sf);
+        ctx.fillStyle = '#9A6030'; ctx.globalAlpha = c * sf;
+        ctx.save(); ctx.translate(x, yb); ctx.rotate(i + tt * .3);
+        ctx.fillRect(-.5 * U, -.35 * U, (1 + hash(i) * .8) * U, .7 * U); ctx.restore();
+        ctx.globalAlpha = c;
+      }
+      ctx.restore();
+    }
+    drawCupFront(G, c);
+    const dripA = seg(q, .76, .8) * (1 - seg(q, .96, 1));
+    if (dripA > 0 && !reduceMotion){
+      ctx.save(); ctx.globalAlpha = dripA;
+      for (let i = 0; i < 5; i++){
+        const ph = (t * .85 + i / 5) % 1;
+        const sx0 = B.x + (hash(i + 900) - .5) * B.r * .9;
+        const sy0 = B.y + Math.sqrt(Math.max(0, B.r * B.r - (sx0 - B.x) ** 2)) - .5 * U;
+        if (sy0 > G.tea) continue;
+        const yy = lerp(sy0, G.tea, ph * ph), s = .7 * U;
+        ctx.fillStyle = '#A65A24';
+        ctx.beginPath(); ctx.moveTo(sx0, yy - s * 2); ctx.quadraticCurveTo(sx0 + s, yy, sx0, yy + s); ctx.quadraticCurveTo(sx0 - s, yy, sx0, yy - s * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+  if (!faceVisible && !(cupVisible && behindCup)) drawBiscuit(B);
+  ctx.restore();
+
+  /* anatomy: one note at a time, with a marker on its feature */
+  {
+    const q = an.q, pinned = an.top === 0 && q > 0 && q < 1;
+    const ho = Math.max(1 - seg(q, .05, .12), seg(q, .9, .97));
+    anHead.style.opacity = ho.toFixed(3);
+    NOTES.forEach((n, i) => {
+      const [h0, h1] = AN_HOLD[i];
+      const o = pinned ? Math.min(seg(q, h0 - .04, h0 + .01), 1 - seg(q, h1 - .01, h1 + .04)) : 0;
+      n.el.style.opacity = o.toFixed(3);
+      n.el.style.visibility = o > .01 ? 'visible' : 'hidden';
+      n.el.style.transform = `translateY(${((1 - o) * 12).toFixed(1)}px)`;
+      if (o > .01 && !faceVisible){
+        const [ox, oy] = faceToScreen(n.ax, n.ay, B.rot, B.axis || 0, B.sx);
+        const mx = B.x + B.r * ox, my = B.y + B.r * oy;
+        ctx.save(); ctx.globalAlpha = o;
+        const r = n.lab.getBoundingClientRect();
+        let ex, ey;
+        if (narrow){ ex = W / 2; ey = r.top - 14; }
+        else { ex = n.side < 0 ? r.right + 14 : r.left - 14; ey = r.top + r.height / 2; }
+        ctx.strokeStyle = COL.ink; ctx.lineWidth = 1; ctx.globalAlpha = o * .7;
+        ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(mx, my); ctx.stroke();
+        ctx.globalAlpha = o;
+        ctx.fillStyle = COL.gold; ctx.strokeStyle = COL.dark;
+        ctx.beginPath(); ctx.arc(mx, my, 13, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(mx, my, 18, 0, TAU); ctx.globalAlpha = o * .35; ctx.stroke(); ctx.globalAlpha = o;
+        ctx.fillStyle = COL.dark; ctx.font = '800 11px Manrope, "Helvetica Neue", Arial, sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i + 1), mx, my + .5);
+        ctx.restore();
+      }
+    });
+  }
+
+  /* labels beside the cutaway */
+  if (c > .25 && !narrow){
+    const toS = (x, yy) => [fx + (x - fx) * z, fy + (yy - fy) * z];
+    const right = toS(G.cx + G.a, 0)[0] + 8 * U * z;
+    if (W - right > 150){
+      ctx.save(); ctx.globalAlpha = seg(c, .25, .9);
+      const wetY = B.y + B.wetLine * B.r;
+      const [ax, ay] = toS(B.x + B.r * .5, wetY);
+      label(ax, ay, right + 20, ay - 30, 'the soak front, rising');
+      const [tx, ty] = toS(G.cx + G.a * .45, G.tea + 22 * U);
+      label(tx, ty, right + 20, ty, 'tea, about 70 °C');
+      ctx.restore();
+    }
+  }
+
+  /* face and the last bite */
+  if (faceVisible){
+    drawFace(F);
+    if (inMouth){
+      ctx.save(); mouthInterior(F.mx, F.my, F.mw, F.up, F.dn); ctx.clip(); drawBiscuit(B); ctx.restore();
+      drawLips(F);
+    } else { drawLips(F); drawBiscuit(B); }
+    const cq = seg(b, .6, .85);
+    if (cq > 0 && cq < 1){
+      for (let i = 0; i < 12; i++){
+        const dir = i % 2 ? 1 : -1, sp = .5 + hash(i + 1100);
+        const x = F.mx + dir * (F.mw * (.55 + hash(i + 1200) * .4) + cq * 16 * U * sp);
+        const yy = F.my + 2 * U - cq * 6 * U * sp + cq * cq * 34 * U;
+        ctx.save(); ctx.globalAlpha = 1 - cq; ctx.fillStyle = i % 3 ? '#C48A4C' : '#6A3B22';
+        ctx.translate(x, yy); ctx.rotate(i + cq * 4);
+        ctx.fillRect(-.6 * U, -.4 * U, (1 + hash(i) * .9) * U, .8 * U);
+        ctx.restore();
+      }
+    }
+  }
+
+  /* DOM */
+  fadePanels(PANELS.dunk, q);
+  fadePanels(PANELS.bite, b);
+  const ro = (ts * 8).toFixed(1) + '|' + Math.round(sf * 100);
+  if (ro !== lastRead){ rTime.textContent = (ts * 8).toFixed(1); rSoak.textContent = Math.round(sf * 100); lastRead = ro; }
+}
+
+/* ---------- loop ---------- */
+let shown = window.scrollY, last = performance.now(), clock = 0;
+function remeasure(){ measure(); }
+window.addEventListener('resize', remeasure);
+new ResizeObserver(remeasure).observe(document.body);
+measure();
+function tick(now){
+  const dt = Math.min(.05, (now - last) / 1000); last = now; clock += dt;
+  if (lenis) lenis.raf(now);
+  const target = window.scrollY;
+  shown = target;
+  // red until the labels section; it turns blue gradually across that section's overview and first zoom
+  { const A = SEC.intro, a0 = A ? A.top - H * .25 : H, a1 = A ? A.top + (A.h - H) * .22 : H * 2, u = clamp((target - a0) / Math.max(1, a1 - a0));
+    document.documentElement.style.setProperty('--wash', u.toFixed(4)); }
+  frame(shown, clock);
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+})();
+</script>
+
+</body>
+</html>
