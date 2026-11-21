@@ -583,6 +583,7 @@ function tint(src, color, mode, inner, paleOnly){
 }
 const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jpg', white: 'img/white.jpg'};
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp'; }
+{ const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table.jpg'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
 }))).then(list => {
@@ -611,7 +612,7 @@ const PORES = (() => {
 })();
 
 /* ---------- layout measurement ---------- */
-var CU = 1, CUPIMG = null, CUPSHADOW = null;
+var CU = 1, CUPIMG = null, CUPSHADOW = null, TABLE = null;
 const PH = {cx: 758, cy: 203.5, rx: 366, ry: 48.5, teaDy: 9, trx: 352, try: 44, bowl: 650, base: 887};
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
 const sections = [...document.querySelectorAll('[data-pose]')].map(el => ({el, name: el.dataset.pose, pin: el.classList.contains('pin'), top: 0, h: 0}));
@@ -1070,8 +1071,34 @@ function drawCupFront(G, c){ return CUPIMG ? drawCupFrontPhoto(G, c) : drawCupFr
 function cupShadow(img){
   const pad = 80, c = document.createElement('canvas'); c.width = img.naturalWidth + pad * 2; c.height = img.naturalHeight + pad * 2;
   const g = c.getContext('2d'); g.filter = 'blur(26px)'; g.drawImage(img, pad, pad);
-  g.filter = 'none'; g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgb(3,4,28)'; g.fillRect(0, 0, c.width, c.height);
+  g.filter = 'none'; g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgb(60,42,22)'; g.fillRect(0, 0, c.width, c.height);
   c.pad = pad; return c;
+}
+// the tea table photo, its top and bottom feathered into the page so it rises in with the cup
+function tableCanvas(img){
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = 'destination-in';
+  const gr = g.createLinearGradient(0, 0, 0, c.height);
+  gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.1, 'rgba(0,0,0,1)'); gr.addColorStop(.9, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
+  return c;
+}
+// where the saucer meets the cloth in the table photo (as a share of its height)
+const TABLE_SPOT = .9;
+function drawTable(G, top){
+  if (!TABLE || !CUPIMG) return;
+  // size it once for the pinned view so it always covers the screen there, then let it ride with the cup
+  const k = G.k, refBase = H / 2 + 26 * CU + (PH.base - PH.cy) * k;
+  const s = Math.max(W * 1.12 / TABLE.width, (refBase + H * .25) / (TABLE_SPOT * TABLE.height));
+  const w = TABLE.width * s, h = TABLE.height * s;
+  const base = G.ry + (PH.base - PH.cy) * k;
+  const y0 = base - TABLE_SPOT * h;
+  if (y0 > H || y0 + h < 0) return;
+  // fade in as the cup rises into place, fade out as it leaves
+  const a = clamp(1 - (base - refBase) / (H * .55)) * clamp(1 - (refBase - base - 40 * CU) / (H * .4));
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.drawImage(TABLE, G.cx - w / 2, y0, w, h); ctx.restore();
 }
 function cupPhoto(G, alpha = 1){
   const k = G.k;
@@ -1096,13 +1123,13 @@ function drawCupBackPhoto(G, c = 0){
   for (const [dx, dy, rx, ryy, a] of [[40, 30, 760, 120, .35], [10, 4, 660, 60, .55]]){
     const sx = G.cx + dx * k, sy = by + dy * k;
     const gr = ctx.createRadialGradient(sx, sy, 0, sx, sy, rx * k);
-    gr.addColorStop(0, `rgba(4,4,22,${a})`); gr.addColorStop(1, 'rgba(4,4,22,0)');
+    gr.addColorStop(0, `rgba(48,32,16,${a})`); gr.addColorStop(1, 'rgba(48,32,16,0)');
     ctx.save(); ctx.translate(sx, sy); ctx.scale(1, ryy / rx); ctx.translate(-sx, -sy);
     ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(sx, sy, rx * k, 0, TAU); ctx.fill(); ctx.restore();
   }
   // its silhouette casts a soft shadow onto the backdrop, down and to the right
   if (CUPSHADOW){ const p = CUPSHADOW.pad;
-    ctx.save(); ctx.globalAlpha = .55;
+    ctx.save(); ctx.globalAlpha = .3;
     ctx.drawImage(CUPSHADOW, G.cx - (PH.cx - 34 + p) * k, G.ry - (PH.cy - 30 + p) * k, CUPSHADOW.width * k, CUPSHADOW.height * k);
     ctx.restore(); }
   // everything but the bowl stays solid; the bowl fades when we look inside the cup
@@ -1305,7 +1332,13 @@ function label(x1, y1, x2, y2, text){
   ctx.beginPath(); ctx.arc(x1, y1, 2.5, 0, TAU); ctx.fill();
   ctx.font = 'italic 400 17px "Cormorant Garamond", Garamond, serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText(text, x2 + 8, y2);
+  // a small navy tag, like the text panels, so it reads on the tablecloth
+  const tw = ctx.measureText(text).width;
+  ctx.save(); ctx.globalAlpha = 1; ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(14,15,62,.9)'; ctx.strokeStyle = 'rgba(244,182,62,.4)';
+  ctx.beginPath(); ctx.roundRect(x2 + 2, y2 - 14, tw + 20, 28, 8); ctx.fill(); ctx.stroke(); ctx.restore();
+  ctx.globalAlpha = 1; ctx.fillStyle = COL.ink;
+  ctx.fillText(text, x2 + 12, y2 + 1);
   ctx.restore();
 }
 
@@ -1436,6 +1469,7 @@ function frame(y, t){
   const fx = W / 2, fy = H / 2;
   ctx.save();
   ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
+  drawTable(G, dk.top);
   if (cupVisible){
     drawCupBack(G, c);
     steam(G, t, (1 - c) * (1 - d * (1 - l)));
