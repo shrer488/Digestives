@@ -39,7 +39,7 @@ body::before,body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-ev
 body::before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cfilter id='c' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0045 0.018' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeDiffuseLighting lighting-color='%23ffffff' surfaceScale='2.4'%3E%3CfeDistantLight azimuth='225' elevation='52'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23c%29'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23n%29'/%3E%3C/svg%3E");background-size:700px 700px,220px 220px;mix-blend-mode:overlay;opacity:.24}
 body::after{background:linear-gradient(118deg,transparent 0 14%,rgba(255,236,236,.07) 21%,transparent 28%,transparent 52%,rgba(255,236,236,.05) 60%,rgba(255,236,236,.0) 64%,transparent 100%),linear-gradient(118deg,transparent 0 76%,rgba(255,240,240,.06) 82%,transparent 88%)}
 /* the blue sweeps up over the red as you scroll, led by a curved gold ribbon like the band on the packet */
-.wash{position:fixed;left:-12vw;right:-12vw;top:-6vh;height:125vh;z-index:-2;pointer-events:none;background:radial-gradient(70% 55% at 18% 12%,rgba(44,48,140,.5),transparent 70%),radial-gradient(60% 50% at 88% 38%,rgba(34,38,120,.4),transparent 70%),radial-gradient(80% 60% at 30% 85%,rgba(4,4,24,.6),transparent 70%),linear-gradient(165deg,#1D1F6E 0%,#16185A 45%,#0C0D3A 100%);border-radius:50% 50% 0 0/9vh 9vh 0 0;border-top:clamp(22px,2.8vw,38px) solid #F4B63E;box-shadow:0 -3px 0 #FFD777,0 -8px 0 #B07A1C,0 -16px 30px rgba(20,0,4,.35),inset 0 6px 10px rgba(255,220,120,.25);transform:translateY(calc((1 - var(--wash,0)) * 98vh - var(--wash,0) * 18vh));will-change:transform}
+.wash{position:fixed;left:0;right:0;top:-6vh;height:125vh;z-index:-2;pointer-events:none;background:radial-gradient(70% 55% at 18% 12%,rgba(44,48,140,.5),transparent 70%),radial-gradient(60% 50% at 88% 38%,rgba(34,38,120,.4),transparent 70%),radial-gradient(80% 60% at 30% 85%,rgba(4,4,24,.6),transparent 70%),linear-gradient(165deg,#1D1F6E 0%,#16185A 45%,#0C0D3A 100%);border-radius:50% 50% 0 0/9vh 9vh 0 0;border-top:clamp(22px,2.8vw,38px) solid #F4B63E;box-shadow:0 -3px 0 #FFD777,0 -8px 0 #B07A1C,0 -16px 30px rgba(20,0,4,.35),inset 0 6px 10px rgba(255,220,120,.25);transform:translateY(calc((1 - var(--wash,0)) * 98vh - var(--wash,0) * 18vh));will-change:transform}
 /* the wheat belongs to the page and scrolls with it; only the sheen and grain stay put */
 body{position:relative}
 .wheat{position:absolute;left:0;top:0;width:100%;height:100%;z-index:-3;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='640' viewBox='0 0 640 640'%3E%3Cdefs%3E%3Cg id='e' fill='%23FF9A86'%3E%3Cg transform='translate%280 61%29'%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 0.0%29 rotate%28-36%29 scale%281.00%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -14.4%29 rotate%2836%29 scale%281.00%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 -32.0%29 rotate%28-36%29 scale%280.93%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -46.4%29 rotate%2836%29 scale%280.93%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 -64.0%29 rotate%28-36%29 scale%280.86%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -78.4%29 rotate%2836%29 scale%280.86%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%28-8 -96.0%29 rotate%28-36%29 scale%280.79%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%288 -110.4%29 rotate%2836%29 scale%280.79%29'/%3E%3Cpath d='M0 0 C15 -9 17 -32 0 -46 C-17 -32 -15 -9 0 0 Z' transform='translate%280 -124%29 scale%28.68%29'/%3E%3Cpath d='M-1.8 34 L1.8 34 L1.3 -120 L-1.3 -120 Z'/%3E%3C/g%3E%3C/g%3E%3C/defs%3E%3Cg opacity='.07'%3E%3Cuse href='%23e' transform='translate%28-199 -234%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28-199 406%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28-199 1046%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28441 -234%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28441 406%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28441 1046%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%281081 -234%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%281081 406%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%281081 1046%29 rotate%28172%29 scale%280.88%29'/%3E%3Cuse href='%23e' transform='translate%28-489 -638%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28-489 2%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28-489 642%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28151 -638%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28151 2%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28151 642%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28791 -638%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28791 2%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28791 642%29 rotate%28134%29 scale%280.95%29'/%3E%3Cuse href='%23e' transform='translate%28-246 -618%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-246 22%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-246 662%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28394 -618%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28394 22%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28394 662%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%281034 -618%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%281034 22%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%281034 662%29 rotate%28118%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-580 -180%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-580 460%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-580 1100%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%2860 -180%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%2860 460%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%2860 1100%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28700 -180%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28700 460%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28700 1100%29 rotate%28357%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-531 -417%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28-531 223%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28-531 863%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28109 -417%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28109 223%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28109 863%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28749 -417%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28749 223%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28749 863%29 rotate%28334%29 scale%280.89%29'/%3E%3Cuse href='%23e' transform='translate%28-326 -400%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-326 240%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-326 880%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28314 -400%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28314 240%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28314 880%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28954 -400%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28954 240%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28954 880%29 rotate%2889%29 scale%281.03%29'/%3E%3Cuse href='%23e' transform='translate%28-57 -538%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-57 102%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-57 742%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28583 -538%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28583 102%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28583 742%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%281223 -538%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%281223 102%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%281223 742%29 rotate%28148%29 scale%280.86%29'/%3E%3Cuse href='%23e' transform='translate%28-387 -177%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28-387 463%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28-387 1103%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28253 -177%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28253 463%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28253 1103%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28893 -177%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28893 463%29 rotate%28225%29 scale%280.91%29'/%3E%3Cuse href='%23e' transform='translate%28893 1103%29 rotate%28225%29 scale%280.91%29'/%3E%3C/g%3E%3C/svg%3E");background-size:640px 640px;background-repeat:repeat}
@@ -58,7 +58,7 @@ p{margin:0}
 .end p{color:#D9DBFF}
 
 /* hero */
-.hero{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;padding-block:48px 76px;position:relative}
+.hero{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;padding-block:48px 76px;position:relative;overflow-x:clip}
 .hero-top{display:grid;gap:.6rem;position:relative;z-index:4}
 .hero-bottom{display:flex;justify-content:space-between;align-items:end;gap:2rem;flex-wrap:wrap;position:relative;z-index:4}
 /* printed texture on the big white lettering: a copy of the word sits exactly on top, filled
@@ -610,6 +610,7 @@ const PORES = (() => {
 })();
 
 /* ---------- layout measurement ---------- */
+var CU = 1;
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
 const sections = [...document.querySelectorAll('[data-pose]')].map(el => ({el, name: el.dataset.pose, pin: el.classList.contains('pin'), top: 0, h: 0}));
 const SEC = Object.fromEntries(sections.map(s => [s.name, s]));
@@ -620,6 +621,8 @@ function measure(){
   canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
   narrow = W <= 820;
   U = Math.min(W * (narrow ? .95 : .62), H * .6) / 100;
+  // the tea scene is drawn in its own, bigger unit so the cup fills the screen
+  CU = U * (narrow ? 1.05 : 1.6);
   sections.forEach(s => { const r = s.el.getBoundingClientRect(); s.top = r.top + window.scrollY; s.h = s.el.offsetHeight; });
   { const pr = SEC.dunk.el.querySelector('.panels').getBoundingClientRect(); PANEL_R = pr.right; }
   SPOT = {};
@@ -663,8 +666,8 @@ function pinState(s, y){
 function geomDunk(top, dd = 0){
   // dd: 0 = biscuit hovering above the cup, 1 = biscuit half in the tea
   const cx = W / 2;
-  const ry = top + H / 2 + lerp(30 * U, -2.9 * U, dd);
-  return {cx, ry, a: 30 * U, b: 23 * U, h: 34 * U, e: 5 * U, tea: ry + 5 * U};
+  const ry = top + H / 2 + lerp(30 * CU, -2.9 * CU, dd);
+  return {cx, ry, a: 30 * CU, b: 23 * CU, h: 34 * CU, e: 5 * CU, tea: ry + 5 * CU};
 }
 function geomBite(top, m = 0){
   // the mouth starts just above the biscuit and closes down over it
@@ -679,7 +682,7 @@ function pose(name, y){
   if (SPOT[name]) return {x: W / 2, y: name === 'hero' ? H * .45 : H / 2, r: SPOT[name].r, rot: SPOT[name].rot, sx: name === 'method' ? -1 : 1};
   switch (name){
     case 'intro': return {x: W / 2, y: H / 2, r: Math.min(W * (narrow ? .78 : .4), H * .58, 520) / 2, rot: 0, sx: 1};
-    case 'dunk': return {x: W / 2, y: H / 2, r: 21 * U, rot: -.14, sx: 1};
+    case 'dunk': return {x: W / 2, y: H / 2, r: 21 * CU, rot: -.14, sx: 1};
     case 'bite': case 'end': return {x: W / 2, y: H / 2, r: 21 * U, rot: 0, sx: 1};
   }
 }
@@ -973,13 +976,20 @@ function shadow(x, y, r, a){
 }
 
 /* ---------- drawing: cup ---------- */
+// a cream porcelain teacup: a fluted bowl that narrows to a footed base with gold bands,
+// a gold rim, a curled handle, garlands of pink roses, on a wavy-edged gold-rimmed saucer
+const CHINA = {cream:'#F7F0E3', shade:'#D8C9B0', deep:'#BBA88A', gold:'#C9A04E', rose:'#D96F8D', rose2:'#F0A9BC', leaf:'#9BB066'};
 function cupPath(G){
-  const {cx, ry, a, b, h, e} = G;
+  const {cx, ry, a, h, e} = G, u = CU, n = 8.5 * u, f = 13 * u;
   ctx.beginPath();
   ctx.moveTo(cx - a, ry);
-  ctx.bezierCurveTo(cx - a, ry + h * .62, cx - b - 3 * U, ry + h, cx - b + 5 * U, ry + h);
-  ctx.lineTo(cx + b - 5 * U, ry + h);
-  ctx.bezierCurveTo(cx + b + 3 * U, ry + h, cx + a, ry + h * .62, cx + a, ry);
+  ctx.bezierCurveTo(cx - a * 1.01, ry + h * .48, cx - a * .66, ry + h * .76, cx - n, ry + h * .8);
+  ctx.lineTo(cx - n, ry + h * .86);
+  ctx.bezierCurveTo(cx - n - 1.5 * u, ry + h * .92, cx - f, ry + h * .94, cx - f, ry + h);
+  ctx.lineTo(cx + f, ry + h);
+  ctx.bezierCurveTo(cx + f, ry + h * .94, cx + n + 1.5 * u, ry + h * .92, cx + n, ry + h * .86);
+  ctx.lineTo(cx + n, ry + h * .8);
+  ctx.bezierCurveTo(cx + a * .66, ry + h * .76, cx + a * 1.01, ry + h * .48, cx + a, ry);
   ctx.ellipse(cx, ry, a, e, 0, 0, Math.PI, false);
   ctx.closePath();
 }
@@ -988,87 +998,156 @@ function teaGrad(G){
   tg.addColorStop(0, '#7E3D14'); tg.addColorStop(.45, '#B0612A'); tg.addColorStop(1, '#7A3A12');
   return tg;
 }
-function drawCupBack(G){
-  const {cx, ry, a, e, tea} = G;
-  shadow(cx, ry + 39 * U, 52 * U, 1);
-  ctx.fillStyle = COL.cup; ctx.strokeStyle = COL.shade; ctx.lineWidth = .5 * U;
-  ctx.beginPath(); ctx.ellipse(cx, ry + 35 * U, 46 * U, 8 * U, 0, 0, TAU); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = COL.gold; ctx.lineWidth = .5 * U;
-  ctx.beginPath(); ctx.ellipse(cx, ry + 35 * U, 43 * U, 7 * U, 0, 0, TAU); ctx.stroke();
-  ctx.fillStyle = COL.shade; ctx.globalAlpha = .45;
-  ctx.beginPath(); ctx.ellipse(cx, ry + 34.4 * U, 27 * U, 4.2 * U, 0, 0, TAU); ctx.fill();
-  ctx.globalAlpha = 1;
+// a little rose with two leaves; sx squashes it where the surface turns away
+function rose(x, y, r, sx = 1, alpha = 1){
+  if (r < .4) return;
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.translate(x, y); ctx.scale(sx, 1);
+  ctx.fillStyle = CHINA.leaf;
+  ctx.beginPath(); ctx.ellipse(-r * 1.25, r * .35, r * .75, r * .32, -.5, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(r * 1.2, r * .45, r * .7, r * .3, .55, 0, TAU); ctx.fill();
+  ctx.fillStyle = CHINA.rose2; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+  ctx.fillStyle = CHINA.rose; ctx.beginPath(); ctx.arc(r * .08, r * .05, r * .72, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(150,40,70,.55)'; ctx.lineWidth = Math.max(.6, r * .16);
+  ctx.beginPath(); ctx.arc(0, 0, r * .42, .3, 4.6); ctx.stroke();
+  ctx.beginPath(); ctx.arc(r * .1, r * .05, r * .18, 2.2, 6.8); ctx.stroke();
+  ctx.restore();
+}
+function bud(x, y, r, sx = 1){
+  ctx.save(); ctx.translate(x, y); ctx.scale(sx, 1);
+  ctx.fillStyle = CHINA.rose2; for (let k = 0; k < 5; k++){ const a = k / 5 * TAU; ctx.beginPath(); ctx.arc(Math.cos(a) * r * .55, Math.sin(a) * r * .55, r * .45, 0, TAU); ctx.fill(); }
+  ctx.fillStyle = '#F6E3A0'; ctx.beginPath(); ctx.arc(0, 0, r * .28, 0, TAU); ctx.fill();
+  ctx.restore();
+}
+function saucer(G, front){
+  const {cx, ry, h} = G, u = CU, sy = ry + h + 1.2 * u, RX = 52 * u, RY = 10 * u;
+  const wave = t => 1 + .012 * Math.sin(t * 18);
+  const edge = () => { ctx.beginPath(); for (let i = 0; i <= 180; i++){ const t = i / 180 * TAU, w = wave(t); i ? ctx.lineTo(cx + Math.cos(t) * RX * w, sy + Math.sin(t) * RY * w) : ctx.moveTo(cx + RX * w, sy); } ctx.closePath(); };
+  if (!front){
+    shadow(cx, sy + 4 * u, RX * 1.06, 1);
+    // underside thickness
+    ctx.save(); ctx.translate(0, 1.6 * u); ctx.fillStyle = CHINA.deep; edge(); ctx.fill(); ctx.restore();
+    const g = ctx.createLinearGradient(cx - RX, 0, cx + RX, 0);
+    g.addColorStop(0, CHINA.shade); g.addColorStop(.35, CHINA.cream); g.addColorStop(.65, CHINA.cream); g.addColorStop(1, CHINA.shade);
+    ctx.fillStyle = g; edge(); ctx.fill();
+    ctx.strokeStyle = CHINA.gold; ctx.lineWidth = .45 * u;
+    ctx.save(); ctx.translate(cx, sy); ctx.scale(.965, .94); ctx.translate(-cx, -sy); edge(); ctx.stroke(); ctx.restore();
+    // the well the cup sits in
+    ctx.fillStyle = 'rgba(190,170,140,.35)'; ctx.beginPath(); ctx.ellipse(cx, sy - .4 * u, 30 * u, 5.6 * u, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(201,160,78,.6)'; ctx.lineWidth = .3 * u; ctx.beginPath(); ctx.ellipse(cx, sy - .4 * u, 31 * u, 5.9 * u, 0, 0, TAU); ctx.stroke();
+    // a ring of roses on the flat of the saucer
+    for (let k = 0; k < 14; k++){
+      const t = k / 14 * TAU + .1, x = cx + Math.cos(t) * RX * .82, y = sy + Math.sin(t) * RY * .8;
+      const sz = (.9 + .5 * Math.sin(t)) * u;
+      if (k % 2) rose(x, y, sz * 1.7, .9, .95); else bud(x, y, sz * 1.2, .9);
+    }
+  }
+}
+function handle(G){
+  const {cx, ry, a} = G, u = CU, hx = cx + a * .97;
+  const path = () => { ctx.beginPath(); ctx.moveTo(hx - 1 * u, ry + 3.5 * u); ctx.bezierCurveTo(hx + 7 * u, ry - .5 * u, hx + 15 * u, ry + 1 * u, hx + 14 * u, ry + 9 * u); ctx.bezierCurveTo(hx + 13 * u, ry + 16 * u, hx + 5 * u, ry + 19 * u, hx - 5.5 * u, ry + 21 * u); };
   ctx.lineCap = 'round';
-  ctx.strokeStyle = COL.shade; ctx.lineWidth = 5.4 * U;
-  ctx.beginPath(); ctx.arc(cx + a + 1 * U, ry + 13 * U, 8.5 * U, -1.25, 1.2); ctx.stroke();
-  ctx.strokeStyle = COL.cup; ctx.lineWidth = 3.8 * U;
-  ctx.beginPath(); ctx.arc(cx + a + 1 * U, ry + 13 * U, 8.5 * U, -1.25, 1.2); ctx.stroke();
-  ctx.fillStyle = COL.shade;
-  ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, 0, TAU); ctx.fill();
+  ctx.strokeStyle = CHINA.deep; ctx.lineWidth = 4.4 * u; path(); ctx.stroke();
+  ctx.strokeStyle = CHINA.cream; ctx.lineWidth = 3.2 * u; path(); ctx.stroke();
+  ctx.strokeStyle = CHINA.gold; ctx.lineWidth = .35 * u; ctx.save(); ctx.translate(.9 * u, -.9 * u); path(); ctx.stroke(); ctx.restore();
+  // the little curl on top of the handle
+  ctx.fillStyle = CHINA.cream; ctx.strokeStyle = CHINA.deep; ctx.lineWidth = .5 * u;
+  ctx.beginPath(); ctx.arc(hx + 3.5 * u, ry + 1.2 * u, 1.8 * u, 0, TAU); ctx.fill(); ctx.stroke();
+}
+function drawCupBack(G){
+  const {cx, ry, a, e, tea} = G, u = CU;
+  saucer(G, false);
+  handle(G);
+  // inside of the cup, with a small bouquet on the far wall
+  const ig = ctx.createLinearGradient(0, ry - e, 0, ry + e);
+  ig.addColorStop(0, CHINA.shade); ig.addColorStop(1, CHINA.cream);
+  ctx.fillStyle = ig; ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, 0, TAU); ctx.fill();
+  rose(cx - a * .28, ry - e * .45, .9 * u, 1, .9); bud(cx - a * .1, ry - e * .55, .6 * u); rose(cx + a * .3, ry - e * .4, .75 * u, 1, .85);
   ctx.fillStyle = teaGrad(G);
-  ctx.beginPath(); ctx.ellipse(cx, tea, a - .7 * U, e * .92, 0, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx, tea, a - .7 * u, e * .92, 0, 0, TAU); ctx.fill();
 }
 function teaFront(G, alpha){
   if (alpha <= 0) return;
   const {cx, a, e, tea} = G;
   ctx.save(); ctx.globalAlpha = alpha;
   ctx.fillStyle = teaGrad(G);
-  ctx.beginPath(); ctx.ellipse(cx, tea, a - .7 * U, e * .92, 0, 0, Math.PI, false); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx, tea, a - .7 * CU, e * .92, 0, 0, Math.PI, false); ctx.closePath(); ctx.fill();
   ctx.fillStyle = 'rgba(255,215,160,.18)';
   ctx.beginPath(); ctx.ellipse(cx - a * .35, tea - e * .2, a * .25, e * .22, 0, 0, TAU); ctx.fill();
   ctx.restore();
 }
 function clipTea(G){
   cupPath(G); ctx.clip();
-  ctx.beginPath(); ctx.rect(G.cx - G.a - 2, G.tea, G.a * 2 + 4, G.h + 4 * U); ctx.clip();
+  ctx.beginPath(); ctx.rect(G.cx - G.a - 2, G.tea, G.a * 2 + 4, G.h * .8); ctx.clip();
 }
 function teaBody(G, c){
   if (c <= 0) return;
   ctx.save(); clipTea(G);
-  const g = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h);
+  const g = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h * .8);
   g.addColorStop(0, `rgba(176,96,40,${.42 * c})`); g.addColorStop(1, `rgba(96,44,12,${.72 * c})`);
   ctx.fillStyle = g; ctx.fillRect(G.cx - G.a, G.tea, G.a * 2, G.h);
   ctx.restore();
 }
 function drawCupFront(G, c){
-  const {cx, ry, a, e} = G;
+  const {cx, ry, a, e, h} = G, u = CU;
   ctx.save();
   ctx.globalAlpha = 1 - .9 * c;
   const g = ctx.createLinearGradient(cx - a, 0, cx + a, 0);
-  g.addColorStop(0, COL.shade); g.addColorStop(.32, COL.cup); g.addColorStop(.55, COL.cup); g.addColorStop(1, COL.shade);
+  g.addColorStop(0, CHINA.shade); g.addColorStop(.3, CHINA.cream); g.addColorStop(.58, '#FBF6EC'); g.addColorStop(1, CHINA.deep);
   ctx.fillStyle = g; cupPath(G); ctx.fill();
   ctx.save(); cupPath(G); ctx.clip();
-  ctx.strokeStyle = COL.gold;
-  ctx.lineWidth = .9 * U; ctx.beginPath(); ctx.ellipse(cx, ry + 7.5 * U, a, e, 0, 0, Math.PI); ctx.stroke();
-  ctx.lineWidth = .3 * U; ctx.beginPath(); ctx.ellipse(cx, ry + 9.4 * U, a, e, 0, 0, Math.PI); ctx.stroke();
+  // fluting: soft vertical ribs around the bowl
+  for (let k = -9; k <= 9; k++){
+    const t = k / 10, x = cx + Math.sin(t * Math.PI / 2) * a;
+    const lg = ctx.createLinearGradient(x - 1.6 * u, 0, x + 1.6 * u, 0);
+    lg.addColorStop(0, 'rgba(160,140,110,0)'); lg.addColorStop(.5, 'rgba(160,140,110,.16)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = lg; ctx.fillRect(x - 1.6 * u, ry + 3 * u, 3.2 * u, h * .72);
+  }
+  // garlands of roses swagging round the bowl
+  const node = th => [cx - Math.cos(th) * a * .93, ry + 9.5 * u + Math.sin(th) * e * 1.05];
+  const N = 7;
+  for (let k = 0; k < N; k++){
+    const t0 = .08 + k / N * (Math.PI - .16), t1 = .08 + (k + 1) / N * (Math.PI - .16);
+    const [x0, y0] = node(t0), [x1, y1] = node(t1), mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + 5.5 * u;
+    ctx.strokeStyle = 'rgba(140,165,95,.8)'; ctx.lineWidth = .35 * u;
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(mx, my + 1.5 * u, x1, y1); ctx.stroke();
+    const sx = Math.max(.35, Math.sin((t0 + t1) / 2));
+    for (let j = 1; j < 4; j++){ const q = j / 4, bx = (1 - q) * (1 - q) * x0 + 2 * q * (1 - q) * mx + q * q * x1, by = (1 - q) * (1 - q) * y0 + 2 * q * (1 - q) * (my + 1.5 * u) + q * q * y1; bud(bx, by, .9 * u, sx); }
+    rose(mx, my + 1.6 * u, 2.3 * u, sx);
+  }
+  for (let k = 0; k <= N; k++){ const th = .08 + k / N * (Math.PI - .16), [x, y] = node(th); rose(x, y, 1.5 * u, Math.max(.35, Math.sin(th))); }
+  // gold bands on the foot
+  ctx.strokeStyle = CHINA.gold;
+  ctx.lineWidth = .45 * u; ctx.beginPath(); ctx.moveTo(cx - 9 * u, ry + h * .865); ctx.lineTo(cx + 9 * u, ry + h * .865); ctx.stroke();
+  ctx.lineWidth = .35 * u; ctx.beginPath(); ctx.moveTo(cx - 12.5 * u, ry + h * .965); ctx.lineTo(cx + 12.5 * u, ry + h * .965); ctx.stroke();
   ctx.restore();
   ctx.restore();
   ctx.save();
-  ctx.strokeStyle = c > 0 ? COL.ink : COL.shade;
-  ctx.globalAlpha = c > 0 ? .25 + .45 * c : .9;
-  ctx.lineWidth = (c > 0 ? .3 : .35) * U;
-  if (c > 0) ctx.setLineDash([1.4 * U, 1.1 * U]);
+  ctx.strokeStyle = c > 0 ? COL.ink : CHINA.deep;
+  ctx.globalAlpha = c > 0 ? .25 + .45 * c : .55;
+  ctx.lineWidth = (c > 0 ? .3 : .25) * u;
+  if (c > 0) ctx.setLineDash([1.4 * u, 1.1 * u]);
   cupPath(G); ctx.stroke();
   ctx.setLineDash([]);
+  // the rim: a thin porcelain lip with a gold line round it
   ctx.globalAlpha = 1;
-  ctx.strokeStyle = COL.cup; ctx.lineWidth = 1.1 * U;
+  ctx.strokeStyle = '#FFFDF7'; ctx.lineWidth = .9 * u;
   ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, Math.PI, TAU); ctx.stroke();
   ctx.globalAlpha = 1 - .6 * c;
   ctx.beginPath(); ctx.ellipse(cx, ry, a, e, 0, 0, Math.PI); ctx.stroke();
-  ctx.strokeStyle = COL.gold; ctx.lineWidth = .25 * U; ctx.globalAlpha = (1 - .6 * c) * .9;
-  ctx.beginPath(); ctx.ellipse(cx, ry, a + .5 * U, e + .25 * U, 0, 0, TAU); ctx.stroke();
+  ctx.strokeStyle = CHINA.gold; ctx.lineWidth = .4 * u; ctx.globalAlpha = (1 - .5 * c);
+  ctx.beginPath(); ctx.ellipse(cx, ry, a + .45 * u, e + .2 * u, 0, 0, TAU); ctx.stroke();
   ctx.restore();
 }
 function steam(G, t, alpha){
   if (alpha <= .01) return;
-  ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = 1.1 * U;
+  ctx.save(); ctx.lineCap = 'round'; ctx.lineWidth = 1.1 * CU;
   for (let k = 0; k < 3; k++){
-    const x0 = G.cx + (k - 1) * 10 * U, base = G.ry - 3 * U, len = 22 * U;
+    const x0 = G.cx + (k - 1) * 10 * CU, base = G.ry - 3 * CU, len = 22 * CU;
     const ph = reduceMotion ? 0 : t * 1.1 + k * 2.1;
     const gr = ctx.createLinearGradient(0, base, 0, base - len);
     gr.addColorStop(0, 'rgba(160,145,125,0)'); gr.addColorStop(.35, `rgba(160,145,125,${.4 * alpha})`); gr.addColorStop(1, 'rgba(160,145,125,0)');
     ctx.strokeStyle = gr; ctx.beginPath();
-    for (let s = 0; s <= 24; s++){ const y = base - s / 24 * len; const x = x0 + Math.sin(ph + s * .42) * 2.2 * U * (s / 24 + .3); s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    for (let s = 0; s <= 24; s++){ const y = base - s / 24 * len; const x = x0 + Math.sin(ph + s * .42) * 2.2 * CU * (s / 24 + .3); s ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
     ctx.stroke();
   }
   ctx.restore();
@@ -1221,7 +1300,7 @@ function frame(y, t){
   const ts = seg(q, .24, .62), sf = Math.sqrt(ts);
   const l = ease(seg(q, .72, .86));
   const G = geomDunk(dk.top, d * (1 - l));
-  const cupVisible = G.ry - 12 * U < H && G.ry + 45 * U > 0;
+  const cupVisible = G.ry - 12 * CU < H && G.ry + 50 * CU > 0;
 
   /* bite timings */
   const b = bt.q;
@@ -1267,7 +1346,7 @@ function frame(y, t){
   /* cup scene with camera zoom */
   // zoom in only as far as the text panel on the left allows
   const panelR = narrow ? 0 : PANEL_R;
-  const zMax = narrow ? .3 : clamp((W / 2 - panelR - 24) / (31 * U) - 1, 0, .5);
+  const zMax = narrow ? .3 : clamp((W / 2 - panelR - 24) / (31 * CU) - 1, 0, .5);
   const z = 1 + zMax * zIn;
   const fx = W / 2, fy = H / 2;
   ctx.save();
@@ -1280,20 +1359,20 @@ function frame(y, t){
     teaBody(G, c);
     if (c > .01){
       ctx.save(); clipTea(G); ctx.globalAlpha = c;
-      const bottom = G.ry + G.h - 2 * U;
+      const bottom = G.ry + G.h - 2 * CU;
       const cos = Math.cos(B.rot), sin = Math.sin(B.rot);
       const tt = reduceMotion ? 0 : t;
       for (let i = 0; i < 26; i++){
         const ph = (tt * .32 + hash(i)) % 1;
-        const sxp = G.cx + (hash(i + 50) - .5) * 2 * (G.a - 5 * U);
+        const sxp = G.cx + (hash(i + 50) - .5) * 2 * (G.a - 5 * CU);
         const pq = PORES[(B.pores + i * 3) % PORES.length];
         const qx = B.x + B.r * (pq.x * cos - pq.y * sin), qy = B.y + B.r * (pq.x * sin + pq.y * cos);
         const e = ease(ph);
-        const x = lerp(sxp, qx, e) + Math.sin(ph * 9 + i) * 1.2 * U * (1 - e);
+        const x = lerp(sxp, qx, e) + Math.sin(ph * 9 + i) * 1.2 * CU * (1 - e);
         const yb = lerp(bottom, qy, e);
-        const rad = (.6 + hash(i + 9) * .9) * U * (1 - seg(ph, .78, 1)) * (.4 + .6 * (1 - sf * .5));
+        const rad = (.6 + hash(i + 9) * .9) * CU * (1 - seg(ph, .78, 1)) * (.4 + .6 * (1 - sf * .5));
         if (rad <= .05) continue;
-        ctx.strokeStyle = 'rgba(255,236,205,.75)'; ctx.lineWidth = .28 * U;
+        ctx.strokeStyle = 'rgba(255,236,205,.75)'; ctx.lineWidth = .28 * CU;
         ctx.fillStyle = 'rgba(255,225,180,.12)';
         ctx.beginPath(); ctx.arc(x, yb, rad, 0, TAU); ctx.fill(); ctx.stroke();
         ctx.fillStyle = 'rgba(255,255,255,.75)';
@@ -1301,18 +1380,18 @@ function frame(y, t){
       }
       for (let i = 0; i < 12; i++){
         const ph = (tt * .22 + hash(i + 200)) % 1;
-        const x = G.cx + (hash(i + 300) - .5) * 2 * (G.a - 4 * U) + Math.sin(ph * 12 + i) * .8 * U;
-        const yb = lerp(bottom, G.tea + 1 * U, ph);
-        ctx.strokeStyle = 'rgba(255,236,205,.5)'; ctx.lineWidth = .22 * U;
-        ctx.beginPath(); ctx.arc(x, yb, (.35 + hash(i + 400) * .5) * U, 0, TAU); ctx.stroke();
+        const x = G.cx + (hash(i + 300) - .5) * 2 * (G.a - 4 * CU) + Math.sin(ph * 12 + i) * .8 * CU;
+        const yb = lerp(bottom, G.tea + 1 * CU, ph);
+        ctx.strokeStyle = 'rgba(255,236,205,.5)'; ctx.lineWidth = .22 * CU;
+        ctx.beginPath(); ctx.arc(x, yb, (.35 + hash(i + 400) * .5) * CU, 0, TAU); ctx.stroke();
       }
       for (let i = 0; i < 9; i++){
         const ph = (tt * .05 + hash(i + 600)) % 1;
-        const x = G.cx + (hash(i + 700) - .5) * 1.6 * G.a + Math.sin(tt * .7 + i) * 1.5 * U;
-        const yb = lerp(G.tea + 6 * U, bottom, ph * sf);
+        const x = G.cx + (hash(i + 700) - .5) * 1.6 * G.a + Math.sin(tt * .7 + i) * 1.5 * CU;
+        const yb = lerp(G.tea + 6 * CU, bottom, ph * sf);
         ctx.fillStyle = '#9A6030'; ctx.globalAlpha = c * sf;
         ctx.save(); ctx.translate(x, yb); ctx.rotate(i + tt * .3);
-        ctx.fillRect(-.5 * U, -.35 * U, (1 + hash(i) * .8) * U, .7 * U); ctx.restore();
+        ctx.fillRect(-.5 * CU, -.35 * CU, (1 + hash(i) * .8) * CU, .7 * CU); ctx.restore();
         ctx.globalAlpha = c;
       }
       ctx.restore();
@@ -1324,9 +1403,9 @@ function frame(y, t){
       for (let i = 0; i < 5; i++){
         const ph = (t * .85 + i / 5) % 1;
         const sx0 = B.x + (hash(i + 900) - .5) * B.r * .9;
-        const sy0 = B.y + Math.sqrt(Math.max(0, B.r * B.r - (sx0 - B.x) ** 2)) - .5 * U;
+        const sy0 = B.y + Math.sqrt(Math.max(0, B.r * B.r - (sx0 - B.x) ** 2)) - .5 * CU;
         if (sy0 > G.tea) continue;
-        const yy = lerp(sy0, G.tea, ph * ph), s = .7 * U;
+        const yy = lerp(sy0, G.tea, ph * ph), s = .7 * CU;
         ctx.fillStyle = '#A65A24';
         ctx.beginPath(); ctx.moveTo(sx0, yy - s * 2); ctx.quadraticCurveTo(sx0 + s, yy, sx0, yy + s); ctx.quadraticCurveTo(sx0 - s, yy, sx0, yy - s * 2); ctx.fill();
       }
@@ -1371,13 +1450,13 @@ function frame(y, t){
   /* labels beside the cutaway */
   if (c > .25 && !narrow){
     const toS = (x, yy) => [fx + (x - fx) * z, fy + (yy - fy) * z];
-    const right = toS(G.cx + G.a, 0)[0] + 8 * U * z;
+    const right = toS(G.cx + G.a, 0)[0] + 16 * CU * z;
     if (W - right > 150){
       ctx.save(); ctx.globalAlpha = seg(c, .25, .9);
       const wetY = B.y + B.wetLine * B.r;
       const [ax, ay] = toS(B.x + B.r * .5, wetY);
       label(ax, ay, right + 20, ay - 30, 'the soak front, rising');
-      const [tx, ty] = toS(G.cx + G.a * .45, G.tea + 22 * U);
+      const [tx, ty] = toS(G.cx + G.a * .45, G.tea + 18 * CU);
       label(tx, ty, right + 20, ty, 'tea, about 70 °C');
       ctx.restore();
     }
