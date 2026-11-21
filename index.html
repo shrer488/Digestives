@@ -582,7 +582,7 @@ function tint(src, color, mode, inner, paleOnly){
   return t;
 }
 const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jpg', white: 'img/white.jpg'};
-{ const im = new Image(); im.onload = () => { CUPIMG = cupCutout(im); }; im.src = 'img/teacup.jpg'; }
+{ const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
 }))).then(list => {
@@ -611,7 +611,7 @@ const PORES = (() => {
 })();
 
 /* ---------- layout measurement ---------- */
-var CU = 1, CUPIMG = null;
+var CU = 1, CUPIMG = null, CUPSHADOW = null;
 const PH = {cx: 758, cy: 203.5, rx: 366, ry: 48.5, teaDy: 9, trx: 352, try: 44, bowl: 650, base: 887};
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
 const sections = [...document.querySelectorAll('[data-pose]')].map(el => ({el, name: el.dataset.pose, pin: el.classList.contains('pin'), top: 0, h: 0}));
@@ -1065,29 +1065,13 @@ function cupPath(G){ return CUPIMG ? cupPathPhoto(G) : cupPathDrawn(G); }
 function drawCupBack(G, c){ return CUPIMG ? drawCupBackPhoto(G, c) : drawCupBackDrawn(G); }
 function teaFront(G, a){ return CUPIMG ? teaFrontPhoto(G, a) : teaFrontDrawn(G, a); }
 function drawCupFront(G, c){ return CUPIMG ? drawCupFrontPhoto(G, c) : drawCupFrontDrawn(G, c); }
-// cut the cup out of its grey studio backdrop (flood in from the edges over neutral greys)
-function cupCutout(img){
-  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-  const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(img, 0, 0);
-  const id = g.getImageData(0, 0, c.width, c.height), px = id.data, Wd = c.width, n = Wd * c.height;
-  const grey = i => { const r = px[i * 4], gg = px[i * 4 + 1], b = px[i * 4 + 2]; return Math.max(r, gg, b) - Math.min(r, gg, b) < 12 && r < 190; };
-  const bg = new Uint8Array(n), st = [];
-  for (let x = 0; x < Wd; x++) st.push(x, n - 1 - x);
-  for (let y = 0; y < c.height; y++) st.push(y * Wd, y * Wd + Wd - 1);
-  while (st.length){
-    const i = st.pop(); if (bg[i] || !grey(i)) continue; bg[i] = 1;
-    const x = i % Wd;
-    if (x > 0) st.push(i - 1); if (x < Wd - 1) st.push(i + 1); if (i >= Wd) st.push(i - Wd); if (i < n - Wd) st.push(i + Wd);
-  }
-  // the backdrop also shows through the loop of the handle, which the flood can't reach
-  for (let y = 215; y < 565; y++) for (let x = 1080; x < 1330; x++){ const i = y * Wd + x; if (grey(i)) bg[i] = 1; }
-  for (let i = 0; i < n; i++){
-    if (bg[i]){ px[i * 4 + 3] = 0; continue; }
-    const x = i % Wd;
-    if ((x > 0 && bg[i - 1]) || (x < Wd - 1 && bg[i + 1]) || (i >= Wd && bg[i - Wd]) || (i < n - Wd && bg[i + Wd])) px[i * 4 + 3] = 150;
-  }
-  g.putImageData(id, 0, 0);
-  return c;
+// the cup photo arrives already cut out (soft, cleaned edges, shadows re-lit by the blue room);
+// this makes the soft shadow it casts on the backdrop behind it, from its own silhouette
+function cupShadow(img){
+  const pad = 80, c = document.createElement('canvas'); c.width = img.naturalWidth + pad * 2; c.height = img.naturalHeight + pad * 2;
+  const g = c.getContext('2d'); g.filter = 'blur(26px)'; g.drawImage(img, pad, pad);
+  g.filter = 'none'; g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgb(3,4,28)'; g.fillRect(0, 0, c.width, c.height);
+  c.pad = pad; return c;
 }
 function cupPhoto(G, alpha = 1){
   const k = G.k;
@@ -1116,6 +1100,11 @@ function drawCupBackPhoto(G, c = 0){
     ctx.save(); ctx.translate(sx, sy); ctx.scale(1, ryy / rx); ctx.translate(-sx, -sy);
     ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(sx, sy, rx * k, 0, TAU); ctx.fill(); ctx.restore();
   }
+  // its silhouette casts a soft shadow onto the backdrop, down and to the right
+  if (CUPSHADOW){ const p = CUPSHADOW.pad;
+    ctx.save(); ctx.globalAlpha = .55;
+    ctx.drawImage(CUPSHADOW, G.cx - (PH.cx - 34 + p) * k, G.ry - (PH.cy - 30 + p) * k, CUPSHADOW.width * k, CUPSHADOW.height * k);
+    ctx.restore(); }
   // everything but the bowl stays solid; the bowl fades when we look inside the cup
   ctx.save(); cupPathPhoto(G); ctx.rect(G.cx - G.a * 4, G.ry - H, G.a * 8, H * 3); ctx.clip('evenodd'); cupPhoto(G); ctx.restore();
   ctx.save(); cupPathPhoto(G); ctx.clip(); cupPhoto(G, 1 - .9 * c); ctx.restore();
