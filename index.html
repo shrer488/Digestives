@@ -1074,18 +1074,34 @@ function cupShadow(img){
   g.filter = 'none'; g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgb(60,42,22)'; g.fillRect(0, 0, c.width, c.height);
   c.pad = pad; return c;
 }
-// the tea table photo, its top and bottom feathered into the page so it rises in with the cup
+// the tea table photo, which rides with the cup
 function tableCanvas(img){
   const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
   const g = c.getContext('2d'); g.drawImage(img, 0, 0);
-  g.globalCompositeOperation = 'destination-in';
-  const gr = g.createLinearGradient(0, 0, 0, c.height);
-  gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(.1, 'rgba(0,0,0,1)'); gr.addColorStop(.9, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, c.width, c.height);
   return c;
 }
 // where the saucer meets the cloth in the table photo (as a share of its height)
 const TABLE_SPOT = .9;
+// the same curved gold ribbon as the packet stripe at the top of the blue (see .wash)
+const ribbonT = () => Math.min(38, Math.max(22, W * .028));
+function domeBelow(Y){
+  // the area under a gentle dome whose peak is at Y in the middle of the screen
+  const R = H * .09;
+  ctx.moveTo(-10, Y + R); ctx.lineTo(0, Y + R);
+  ctx.ellipse(W / 2, Y + R, W / 2, R, 0, Math.PI, 2 * Math.PI);
+  ctx.lineTo(W + 10, Y + R); ctx.lineTo(W + 10, Y + 1e5); ctx.lineTo(-10, Y + 1e5); ctx.closePath();
+}
+function ribbonBand(Y1, Y2, col){ ctx.fillStyle = col; ctx.beginPath(); domeBelow(Y1); domeBelow(Y2); ctx.fill('evenodd'); }
+function ribbon(Y){
+  if (Y > H + 10 || Y + H * .09 + 60 < 0) return;
+  const t = ribbonT();
+  ctx.save();
+  ctx.shadowColor = 'rgba(20,0,4,.35)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = -16;
+  ribbonBand(Y - 8, Y + t, '#B07A1C');
+  ctx.restore();
+  ribbonBand(Y - 3, Y + t, '#FFD777');
+  ribbonBand(Y, Y + t, '#F4B63E');
+}
 function drawTable(G, top){
   if (!TABLE || !CUPIMG) return;
   // size it once for the pinned view so it always covers the screen there, then let it ride with the cup
@@ -1095,10 +1111,7 @@ function drawTable(G, top){
   const base = G.ry + (PH.base - PH.cy) * k;
   const y0 = base - TABLE_SPOT * h;
   if (y0 > H || y0 + h < 0) return;
-  // fade in as the cup rises into place, fade out as it leaves
-  const a = clamp(1 - (base - refBase) / (H * .55)) * clamp(1 - (refBase - base - 40 * CU) / (H * .4));
-  if (a <= 0) return;
-  ctx.save(); ctx.globalAlpha = a; ctx.drawImage(TABLE, G.cx - w / 2, y0, w, h); ctx.restore();
+  ctx.drawImage(TABLE, G.cx - w / 2, y0, w, h);
 }
 function cupPhoto(G, alpha = 1){
   const k = G.k;
@@ -1467,9 +1480,17 @@ function frame(y, t){
   const zMax = narrow ? .3 : clamp((W / 2 - panelR - 24) / (31 * CU) - 1, 0, .5);
   const z = 1 + zMax * zIn;
   const fx = W / 2, fy = H / 2;
+  // the tea table lives between two gold ribbons: one where the section starts, one where it ends
+  const rTop = SEC.dunk.top - y, rBot = SEC.dunk.top + SEC.dunk.h - y, RT = ribbonT();
+  const bandOn = rTop < H && rBot > -RT;
+  ctx.save();
+  if (bandOn){
+    ctx.beginPath(); domeBelow(rTop + RT); ctx.clip();
+    ctx.beginPath(); ctx.rect(-10, -1e5, W + 20, 2e5); domeBelow(rBot - 8); ctx.clip('evenodd');
+  }
   ctx.save();
   ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
-  drawTable(G, dk.top);
+  if (bandOn) drawTable(G, dk.top);
   if (cupVisible){
     drawCupBack(G, c);
     steam(G, t, (1 - c) * (1 - d * (1 - l)));
@@ -1531,8 +1552,10 @@ function frame(y, t){
       ctx.restore();
     }
   }
-  if (!faceVisible && !(cupVisible && behindCup)) drawBiscuit(B);
   ctx.restore();
+  ctx.restore();
+  if (bandOn){ ribbon(rTop); ribbon(rBot); }
+  if (!faceVisible && !(cupVisible && behindCup)) drawBiscuit(B);
 
   /* anatomy: one note at a time, with a marker on its feature */
   {
@@ -1583,11 +1606,13 @@ function frame(y, t){
 
   /* face and the last bite */
   if (faceVisible){
-    drawFace(F);
+    // the face belongs to the next section: it only shows below the ribbon that closes the tea table
+    const belowRibbon = fn => { ctx.save(); if (bandOn){ ctx.beginPath(); domeBelow(rBot + RT); ctx.clip(); } fn(); ctx.restore(); };
+    belowRibbon(() => drawFace(F));
     if (inMouth){
       ctx.save(); mouthInterior(F.mx, F.my, F.mw, F.up, F.dn); ctx.clip(); drawBiscuit(B); ctx.restore();
-      drawLips(F);
-    } else { drawLips(F); drawBiscuit(B); }
+      belowRibbon(() => drawLips(F));
+    } else { belowRibbon(() => drawLips(F)); drawBiscuit(B); }
     const cq = seg(b, .6, .85);
     if (cq > 0 && cq < 1){
       for (let i = 0; i < 12; i++){
