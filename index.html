@@ -1491,9 +1491,11 @@ function frame(y, t){
     ctx.beginPath(); domeBelow(rTop + RT); ctx.clip();
     ctx.beginPath(); ctx.rect(-10, -1e5, W + 20, 2e5); domeBelow(rBot - 8); ctx.clip('evenodd');
   }
+  // the table and the ribbon form one still frame while the scene is held: the table follows the page,
+  // not the cup's rise or the camera's zoom, so nothing slides against the ribbon
+  if (bandOn) drawTable(geomDunk(dk.top, 0), dk.top);
   ctx.save();
   ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
-  if (bandOn) drawTable(G, dk.top);
   if (cupVisible){
     drawCupBack(G, c);
     steam(G, t, (1 - c) * (1 - d * (1 - l)));
