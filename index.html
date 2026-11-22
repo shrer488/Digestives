@@ -1123,16 +1123,23 @@ function cupPhoto(G, alpha = 1){
   ctx.restore();
 }
 // the bowl's outline in the photo, for the see-through view of the tea
+const BOWL_L = [[395, 206], [399, 226], [407, 246], [413, 266], [419, 286], [425, 306], [430, 326], [436, 346], [440, 366], [445, 386], [451, 406], [457, 426], [463, 446], [469, 466], [478, 486], [500, 520], [520, 540], [540, 557], [560, 577], [580, 594], [600, 607], [615, 617], [640, 627]];
+const BOWL_R = [[880, 622], [900, 615], [920, 607], [940, 597], [955, 585], [975, 568], [995, 550], [1012, 526], [1039, 486], [1048, 466], [1055, 446], [1061, 426], [1066, 406], [1072, 386], [1077, 366], [1083, 346], [1092, 326], [1096, 306], [1103, 286], [1106, 266], [1112, 246], [1120, 226], [1123, 206]];
 function cupPathPhoto(G){
   const k = G.k, X = x => G.cx + (x - PH.cx) * k, Y = y => G.ry + (y - PH.cy) * k;
   ctx.beginPath();
-  // traced from the photo: straight flared walls that roll in to meet the stem
-  ctx.moveTo(X(395), Y(203.5));
-  ctx.bezierCurveTo(X(425), Y(330), X(460), Y(440), X(490), Y(500));
-  ctx.bezierCurveTo(X(520), Y(570), X(560), Y(640), X(612), Y(658));
-  ctx.quadraticCurveTo(X(760), Y(672), X(908), Y(658));
-  ctx.bezierCurveTo(X(960), Y(640), X(1000), Y(570), X(1030), Y(500));
-  ctx.bezierCurveTo(X(1060), Y(440), X(1095), Y(330), X(1123), Y(203.5));
+  // the cup's edge, found pixel by pixel in the photo: flared walls rolling in to the stem
+  const through = pts => {
+    const p = [pts[0], ...pts, pts[pts.length - 1]];
+    for (let n = 1; n < p.length - 2; n++){
+      const [a, b, c, d] = [p[n - 1], p[n], p[n + 1], p[n + 2]];
+      ctx.bezierCurveTo(X(b[0] + (c[0] - a[0]) / 6), Y(b[1] + (c[1] - a[1]) / 6), X(c[0] - (d[0] - b[0]) / 6), Y(c[1] - (d[1] - b[1]) / 6), X(c[0]), Y(c[1]));
+    }
+  };
+  ctx.moveTo(X(395), Y(206));
+  through(BOWL_L);
+  ctx.quadraticCurveTo(X(760), Y(640), X(880), Y(622));
+  through(BOWL_R);
   ctx.ellipse(G.cx, G.ry, G.a, G.e, 0, 0, Math.PI, false);
   ctx.closePath();
 }
