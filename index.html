@@ -1085,15 +1085,17 @@ const TABLE_SPOT = .9;
 // the same curved gold ribbon as the packet stripe at the top of the blue (see .wash)
 const ribbonT = () => Math.min(38, Math.max(22, W * .028));
 function domeBelow(Y){
-  // the area under a gentle dome whose peak is at Y in the middle of the screen
-  const R = H * .09;
-  ctx.moveTo(-10, Y + R); ctx.lineTo(0, Y + R);
-  ctx.ellipse(W / 2, Y + R, W / 2, R, 0, Math.PI, 2 * Math.PI);
-  ctx.lineTo(W + 10, Y + R); ctx.lineTo(W + 10, Y + 1e5); ctx.lineTo(-10, Y + 1e5); ctx.closePath();
+  // the area under an S-shaped wave, like the stripe on the packet: low on the left, sweeping up to the right.
+  // Y is the wave's highest point (at the right edge)
+  const A = Math.min(W * .17, H * .26), X = u => u * W, V = v => Y + v * A;
+  ctx.moveTo(-10, V(.877)); ctx.lineTo(X(0), V(.877));
+  ctx.bezierCurveTo(X(.114), V(.967), X(.396), V(1.08), X(.533), V(.733));
+  ctx.bezierCurveTo(X(.67), V(.342), X(.837), V(-.03), X(1), V(.012));
+  ctx.lineTo(W + 10, V(.012)); ctx.lineTo(W + 10, Y + 1e5); ctx.lineTo(-10, Y + 1e5); ctx.closePath();
 }
 function ribbonBand(Y1, Y2, col){ ctx.fillStyle = col; ctx.beginPath(); domeBelow(Y1); domeBelow(Y2); ctx.fill('evenodd'); }
 function ribbon(Y){
-  if (Y > H + 10 || Y + H * .09 + 60 < 0) return;
+  if (Y > H + 10 || Y + H * .3 + 60 < 0) return;
   const t = ribbonT();
   ctx.save();
   ctx.shadowColor = 'rgba(20,0,4,.35)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = -16;
