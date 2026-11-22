@@ -1084,10 +1084,11 @@ function tableCanvas(img){
 const TABLE_SPOT = .9;
 // the same curved gold ribbon as the packet stripe at the top of the blue (see .wash)
 const ribbonT = () => Math.min(38, Math.max(22, W * .028));
+const waveA = () => Math.min(W * .17, H * .26);
 function domeBelow(Y){
   // the area under an S-shaped wave, like the stripe on the packet: low on the left, sweeping up to the right.
   // Y is the wave's highest point (at the right edge)
-  const A = Math.min(W * .17, H * .26), X = u => u * W, V = v => Y + v * A;
+  const A = waveA(), X = u => u * W, V = v => Y + v * A;
   ctx.moveTo(-10, V(.877)); ctx.lineTo(X(0), V(.877));
   ctx.bezierCurveTo(X(.114), V(.967), X(.396), V(1.08), X(.533), V(.733));
   ctx.bezierCurveTo(X(.67), V(.342), X(.837), V(-.03), X(1), V(.012));
@@ -1108,7 +1109,7 @@ function drawTable(G, top){
   if (!TABLE || !CUPIMG) return;
   // size it once for the pinned view so it always covers the screen there, then let it ride with the cup
   const k = G.k, refBase = H / 2 + 26 * CU + (PH.base - PH.cy) * k;
-  const s = Math.max(W * 1.12 / TABLE.width, (refBase + H * .25) / (TABLE_SPOT * TABLE.height));
+  const s = Math.max(W * 1.12 / TABLE.width, (refBase + H * .25 + waveA() * 1.1 + ribbonT()) / (TABLE_SPOT * TABLE.height));
   const w = TABLE.width * s, h = TABLE.height * s;
   const base = G.ry + (PH.base - PH.cy) * k;
   const y0 = base - TABLE_SPOT * h;
@@ -1483,7 +1484,7 @@ function frame(y, t){
   const z = 1 + zMax * zIn;
   const fx = W / 2, fy = H / 2;
   // the tea table lives between two gold ribbons: one where the section starts, one where it ends
-  const rTop = SEC.dunk.top - y, rBot = SEC.dunk.top + SEC.dunk.h - y, RT = ribbonT();
+  const rTop = SEC.dunk.top - y - waveA() * 1.1 - ribbonT(), rBot = SEC.dunk.top + SEC.dunk.h - y, RT = ribbonT();
   const bandOn = rTop < H && rBot > -RT;
   ctx.save();
   if (bandOn){
