@@ -1126,10 +1126,13 @@ function cupPhoto(G, alpha = 1){
 function cupPathPhoto(G){
   const k = G.k, X = x => G.cx + (x - PH.cx) * k, Y = y => G.ry + (y - PH.cy) * k;
   ctx.beginPath();
-  ctx.moveTo(X(392), Y(203.5));
-  ctx.bezierCurveTo(X(398), Y(420), X(520), Y(610), X(640), Y(PH.bowl));
-  ctx.quadraticCurveTo(X(758), Y(PH.bowl + 26), X(876), Y(PH.bowl));
-  ctx.bezierCurveTo(X(996), Y(610), X(1118), Y(420), X(1124), Y(203.5));
+  // traced from the photo: straight flared walls that roll in to meet the stem
+  ctx.moveTo(X(395), Y(203.5));
+  ctx.bezierCurveTo(X(425), Y(330), X(460), Y(440), X(490), Y(500));
+  ctx.bezierCurveTo(X(520), Y(570), X(560), Y(640), X(612), Y(658));
+  ctx.quadraticCurveTo(X(760), Y(672), X(908), Y(658));
+  ctx.bezierCurveTo(X(960), Y(640), X(1000), Y(570), X(1030), Y(500));
+  ctx.bezierCurveTo(X(1060), Y(440), X(1095), Y(330), X(1123), Y(203.5));
   ctx.ellipse(G.cx, G.ry, G.a, G.e, 0, 0, Math.PI, false);
   ctx.closePath();
 }
