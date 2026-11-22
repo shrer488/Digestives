@@ -121,7 +121,7 @@ p{margin:0}
 .slot::before{content:"";position:absolute;inset:11%;border-radius:50%;border:1px dashed var(--rule)}
 
 /* method / statement */
-.method{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:auto 1fr auto;padding-block:96px 72px;position:relative}
+.method{min-height:62vh;min-height:62svh;display:grid;grid-template-rows:auto 1fr auto;padding-block:96px 24px;position:relative}
 /* invisible spots the biscuit is pinned to, so it scrolls with the page */
 .spot{position:absolute;aspect-ratio:1;pointer-events:none}
 .hero-spot{left:50%;top:50%;translate:-50% -50%;width:min(88vw,86vh,960px)}
@@ -1109,7 +1109,7 @@ function drawTable(G, top){
   if (!TABLE || !CUPIMG) return;
   // size it once for the pinned view so it always covers the screen there, then let it ride with the cup
   const k = G.k, refBase = H / 2 + 26 * CU + (PH.base - PH.cy) * k;
-  const s = Math.max(W * 1.12 / TABLE.width, (refBase + H * .25 + waveA() * 1.1 + ribbonT()) / (TABLE_SPOT * TABLE.height));
+  const s = Math.max(W * 1.12 / TABLE.width, (refBase + H * .25) / (TABLE_SPOT * TABLE.height));
   const w = TABLE.width * s, h = TABLE.height * s;
   const base = G.ry + (PH.base - PH.cy) * k;
   const y0 = base - TABLE_SPOT * h;
@@ -1484,7 +1484,7 @@ function frame(y, t){
   const z = 1 + zMax * zIn;
   const fx = W / 2, fy = H / 2;
   // the tea table lives between two gold ribbons: one where the section starts, one where it ends
-  const rTop = SEC.dunk.top - y - waveA() * 1.1 - ribbonT(), rBot = SEC.dunk.top + SEC.dunk.h - y, RT = ribbonT();
+  const rTop = dk.top - waveA() * .35, rBot = SEC.dunk.top + SEC.dunk.h - y, RT = ribbonT();
   const bandOn = rTop < H && rBot > -RT;
   ctx.save();
   if (bandOn){
