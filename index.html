@@ -1128,7 +1128,7 @@ function cupPathPhoto(G){
   ctx.beginPath();
   ctx.moveTo(X(392), Y(203.5));
   ctx.bezierCurveTo(X(398), Y(420), X(520), Y(610), X(640), Y(PH.bowl));
-  ctx.lineTo(X(876), Y(PH.bowl));
+  ctx.quadraticCurveTo(X(758), Y(PH.bowl + 26), X(876), Y(PH.bowl));
   ctx.bezierCurveTo(X(996), Y(610), X(1118), Y(420), X(1124), Y(203.5));
   ctx.ellipse(G.cx, G.ry, G.a, G.e, 0, 0, Math.PI, false);
   ctx.closePath();
@@ -1202,14 +1202,15 @@ function teaFrontDrawn(G, alpha){
 }
 function clipTea(G){
   cupPath(G); ctx.clip();
-  ctx.beginPath(); ctx.rect(G.cx - G.a - 2, G.tea, G.a * 2 + 4, G.h * .8); ctx.clip();
+  // everything in the bowl below the surface: the bowl's own curve shapes the tea, right to the bottom
+  ctx.beginPath(); ctx.rect(G.cx - G.a - 10, G.tea, G.a * 2 + 20, G.h * 1.5); ctx.clip();
 }
 function teaBody(G, c){
   if (c <= 0) return;
   ctx.save(); clipTea(G);
-  const g = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h * .8);
+  const g = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h);
   g.addColorStop(0, `rgba(176,96,40,${.68 * c})`); g.addColorStop(1, `rgba(96,44,12,${.9 * c})`);
-  ctx.fillStyle = g; ctx.fillRect(G.cx - G.a, G.tea, G.a * 2, G.h);
+  ctx.fillStyle = g; ctx.fillRect(G.cx - G.a - 10, G.tea, G.a * 2 + 20, G.h * 1.5);
   ctx.restore();
 }
 function drawCupFrontDrawn(G, c){
