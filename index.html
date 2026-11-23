@@ -181,9 +181,6 @@ p{margin:0}
 }
 @media (prefers-reduced-motion:reduce){.cue::after{animation:none}}
 </style>
-</head>
-<body>
-
 
 
 <div class="wash" aria-hidden="true"></div>
@@ -1136,11 +1133,19 @@ function cupPathPhoto(G){
       ctx.bezierCurveTo(X(b[0] + (c[0] - a[0]) / 6), Y(b[1] + (c[1] - a[1]) / 6), X(c[0] - (d[0] - b[0]) / 6), Y(c[1] - (d[1] - b[1]) / 6), X(c[0]), Y(c[1]));
     }
   };
-  ctx.moveTo(X(395), Y(206));
-  through(BOWL_L);
-  ctx.quadraticCurveTo(X(760), Y(640), X(880), Y(622));
-  through(BOWL_R);
-  ctx.ellipse(G.cx, G.ry, G.a, G.e, 0, 0, Math.PI, false);
+  // pull the whole outline 1 screen px inside the cup's edge
+  const d = 1 / k;
+  const inset = pts => pts.map((q, n) => {
+    const a = pts[Math.max(0, n - 1)], b = pts[Math.min(pts.length - 1, n + 1)];
+    const tx = b[0] - a[0], ty = b[1] - a[1], l = Math.hypot(tx, ty) || 1;
+    return [q[0] + ty / l * d, q[1] - tx / l * d];
+  });
+  const L = inset(BOWL_L), R = inset(BOWL_R);
+  ctx.moveTo(X(L[0][0]), Y(L[0][1]));
+  through(L);
+  ctx.quadraticCurveTo(X(760), Y(640 - d), X(R[0][0]), Y(R[0][1]));
+  through(R);
+  ctx.ellipse(G.cx, G.ry, G.a - 1, G.e - 1, 0, 0, Math.PI, false);
   ctx.closePath();
 }
 function drawCupBackPhoto(G, c = 0){
@@ -1671,6 +1676,5 @@ requestAnimationFrame(tick);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
 })();
 </script>
-
 </body>
 </html>
