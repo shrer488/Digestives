@@ -582,6 +582,7 @@ function tint(src, color, mode, inner, paleOnly){
 }
 const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jpg', white: 'img/white.jpg'};
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp'; }
+{ const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp'; }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table.jpg'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -611,7 +612,7 @@ const PORES = (() => {
 })();
 
 /* ---------- layout measurement ---------- */
-var CU = 1, CUPIMG = null, CUPSHADOW = null, TABLE = null;
+var CU = 1, CUTIMG = null, CUPIMG = null, CUPSHADOW = null, TABLE = null;
 const PH = {cx: 758, cy: 203.5, rx: 366, ry: 48.5, teaDy: 150, trx: 321, try: 40, bowl: 650, base: 887};
 const WALL = 16;   // how thick the cut-away cup wall reads, in screen px
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
@@ -1123,6 +1124,8 @@ function cupPhoto(G, alpha = 1){
   ctx.restore();
 }
 // the bowl's outline in the photo, for the see-through view of the tea
+const CUT_WALL = 20.0;
+const CUT_TEA = [[416.2,201.8],[416.9,204.4],[418.0,208.0],[419.2,212.3],[420.5,216.7],[421.7,220.8],[422.9,224.7],[424.0,228.5],[425.1,232.4],[426.3,236.3],[427.5,240.2],[428.6,244.1],[429.8,248.0],[431.0,252.0],[432.2,255.9],[433.4,259.9],[434.6,263.9],[435.8,267.9],[437.0,271.9],[438.2,275.9],[439.4,280.0],[440.6,284.0],[441.7,288.0],[442.9,292.1],[444.1,296.1],[445.2,300.2],[446.3,304.2],[447.5,308.2],[448.6,312.3],[449.7,316.3],[450.8,320.4],[451.9,324.4],[452.9,328.4],[454.0,332.5],[455.1,336.5],[456.1,340.5],[457.2,344.5],[458.2,348.5],[459.2,352.5],[460.3,356.5],[461.3,360.5],[462.4,364.5],[463.4,368.4],[464.5,372.4],[465.6,376.3],[466.6,380.3],[467.7,384.2],[468.8,388.2],[469.9,392.1],[471.0,396.1],[472.2,400.0],[473.3,403.9],[474.5,407.9],[475.7,411.8],[476.9,415.7],[478.2,419.7],[479.5,423.6],[480.8,427.6],[482.2,431.5],[483.6,435.5],[485.2,439.5],[486.8,443.5],[488.4,447.5],[490.1,451.6],[492.0,455.6],[493.9,459.7],[496.0,463.8],[498.2,468.0],[500.5,472.1],[502.9,476.3],[505.4,480.5],[508.0,484.6],[510.8,488.8],[513.7,493.0],[516.7,497.2],[519.8,501.3],[522.9,505.4],[526.3,509.5],[529.6,513.6],[533.1,517.6],[536.6,521.5],[540.2,525.4],[543.8,529.2],[547.5,533.0],[551.2,536.7],[554.9,540.4],[558.6,543.9],[562.3,547.4],[566.1,550.8],[569.8,554.2],[573.6,557.4],[577.3,560.6],[581.0,563.7],[584.7,566.7],[588.4,569.6],[592.1,572.4],[595.8,575.2],[599.5,577.9],[603.2,580.4],[606.9,583.0],[610.6,585.4],[614.3,587.8],[618.0,590.1],[621.7,592.3],[625.5,594.5],[629.2,596.7],[633.2,598.9],[637.6,601.3],[641.8,603.6],[645.5,605.6],[648.0,606.9],[667.5,608.7],[687.0,610.1],[706.5,611.0],[726.0,611.5],[745.6,611.6],[765.1,611.2],[784.7,610.4],[804.2,609.2],[823.8,607.6],[843.4,605.5],[863.1,603.0],[874.0,601.2],[877.1,599.9],[881.0,598.2],[885.2,596.4],[889.4,594.7],[893.1,593.0],[896.7,591.3],[900.3,589.7],[903.9,588.0],[907.5,586.2],[911.0,584.3],[914.5,582.4],[918.0,580.5],[921.5,578.4],[925.0,576.3],[928.4,574.1],[931.9,571.7],[935.3,569.3],[938.7,566.8],[942.1,564.2],[945.6,561.4],[949.0,558.5],[952.5,555.4],[955.9,552.3],[959.4,549.0],[962.8,545.6],[966.3,542.0],[969.8,538.2],[973.3,534.4],[976.7,530.4],[980.2,526.3],[983.6,522.1],[987.0,517.8],[990.3,513.4],[993.6,508.9],[996.8,504.4],[1000.0,499.9],[1003.0,495.2],[1006.0,490.6],[1008.9,486.0],[1011.6,481.4],[1014.2,476.9],[1016.8,472.3],[1019.2,467.8],[1021.5,463.4],[1023.6,459.0],[1025.6,454.7],[1027.6,450.4],[1029.4,446.2],[1031.1,442.0],[1032.8,437.9],[1034.3,433.8],[1035.8,429.8],[1037.2,425.8],[1038.5,421.8],[1039.9,417.8],[1041.2,413.8],[1042.4,409.8],[1043.6,405.8],[1044.8,401.9],[1046.0,397.9],[1047.2,393.9],[1048.3,389.9],[1049.5,385.9],[1050.7,381.9],[1051.8,377.9],[1053.0,373.9],[1054.2,369.8],[1055.4,365.8],[1056.6,361.8],[1057.8,357.8],[1059.1,353.8],[1060.3,349.7],[1061.5,345.7],[1062.7,341.7],[1064.0,337.7],[1065.2,333.7],[1066.4,329.7],[1067.6,325.7],[1068.9,321.8],[1070.0,317.8],[1071.2,313.8],[1072.4,309.9],[1073.6,305.9],[1074.7,302.0],[1075.9,298.0],[1077.0,294.1],[1078.1,290.1],[1079.3,286.2],[1080.4,282.2],[1081.5,278.3],[1082.5,274.3],[1083.6,270.3],[1084.7,266.4],[1085.8,262.4],[1086.9,258.5],[1087.9,254.6],[1089.0,250.6],[1090.0,246.7],[1091.1,242.8],[1092.1,238.9],[1093.2,235.1],[1094.2,231.2],[1095.2,227.4],[1096.2,223.6],[1097.2,219.7],[1098.4,215.4],[1099.5,211.0],[1100.5,207.1],[1101.3,203.9]];
 const BOWL_L = [[395, 206], [399, 226], [407, 246], [413, 266], [419, 286], [425, 306], [430, 326], [436, 346], [440, 366], [445, 386], [451, 406], [457, 426], [463, 446], [469, 466], [478, 486], [500, 520], [520, 540], [540, 557], [560, 577], [580, 594], [600, 607], [615, 617], [640, 627]];
 const BOWL_R = [[880, 622], [900, 615], [920, 607], [940, 597], [955, 585], [975, 568], [995, 550], [1012, 526], [1039, 486], [1048, 466], [1055, 446], [1061, 426], [1066, 406], [1072, 386], [1077, 366], [1083, 346], [1092, 326], [1096, 306], [1103, 286], [1106, 266], [1112, 246], [1120, 226], [1123, 206]];
 function cupPathPhoto(G, w = WALL, fresh = true, open = false){
@@ -1178,35 +1181,22 @@ function cupPathPhoto(G, w = WALL, fresh = true, open = false){
   ctx.ellipse(G.cx, G.ry, ia, ie, 0, 0, Math.PI, true);
   ctx.closePath();
 }
+function teaPath(G){
+  // the inside face of the cut wall, baked with the cup image, a hair inside its gold line
+  const k = G.k, X = x => G.cx + (x - PH.cx) * k, Y = y => G.ry + (y - PH.cy) * k;
+  ctx.beginPath(); ctx.moveTo(X(CUT_TEA[0][0]), Y(CUT_TEA[0][1]));
+  for (let i = 1; i < CUT_TEA.length; i++) ctx.lineTo(X(CUT_TEA[i][0]), Y(CUT_TEA[i][1]));
+  ctx.closePath();
+}
 function teaCutaway(G, B, c, withBiscuit){
   // cut open, the surface is shown a little more from above so it reads as a plane
-  G = Object.assign({}, G, {try: G.trx * .24});
+  const trx = (PH.trx - CUT_WALL - 2) * G.k;
+  G = Object.assign({}, G, {trx, try: trx * .24});
   ctx.save(); ctx.globalAlpha = c;
-  // one clean region: the cut-open bowl joined to the opening inside the rim, so no seams or corners at the rim
-  ctx.save(); cupPathPhoto(G); ctx.clip();
-  // the inside of the far wall: a little shade under the back of the rim, then curving away into shadow
-  // the cream inside starts at the rim's front edge and feathers upward into the real photo, so the
-  // corners and the rim blend instead of meeting at a hard line
-  const belowArc = sh => {
-    ctx.beginPath();
-    ctx.moveTo(G.cx - G.a * 2, G.ry - sh); ctx.lineTo(G.cx - G.a, G.ry - sh);
-    ctx.ellipse(G.cx, G.ry - sh, G.a, G.e, 0, Math.PI, 0, true);
-    ctx.lineTo(G.cx + G.a * 2, G.ry - sh); ctx.lineTo(G.cx + G.a * 2, G.ry + G.h * 2); ctx.lineTo(G.cx - G.a * 2, G.ry + G.h * 2);
-    ctx.closePath();
-  };
-  const ig = ctx.createLinearGradient(0, G.ry - G.e, 0, G.tea + G.try);
-  ig.addColorStop(0, '#EAE0CE'); ig.addColorStop(.3, '#EFE7D9'); ig.addColorStop(1, '#D6C4A8');
-  const sg = ctx.createLinearGradient(G.cx - G.a, 0, G.cx + G.a, 0);
-  sg.addColorStop(0, 'rgba(120,90,60,.28)'); sg.addColorStop(.25, 'rgba(120,90,60,0)');
-  sg.addColorStop(.75, 'rgba(120,90,60,0)'); sg.addColorStop(1, 'rgba(120,90,60,.28)');
-  const ga = ctx.globalAlpha, FE = 7;
-  for (let n = FE; n >= 0; n--){
-    ctx.save(); belowArc(n * 1.6); ctx.clip();
-    ctx.globalAlpha = ga * (n === 0 ? 1 : .22);
-    ctx.fillStyle = ig; ctx.fillRect(G.cx - G.a * 1.5, G.ry - G.e * 2, G.a * 3, G.h * 3);
-    ctx.fillStyle = sg; ctx.fillRect(G.cx - G.a * 1.5, G.ry - G.e * 2, G.a * 3, G.h * 3);
-    ctx.restore();
-  }
+  // the cup with its front cut away: baked from the photo, so the inside, the rim and the cut edge are
+  // the cup's own porcelain with no seams
+  if (CUTIMG){ const k = G.k; ctx.drawImage(CUTIMG, G.cx - PH.cx * k, G.ry - PH.cy * k, CUTIMG.width * k, CUTIMG.height * k); }
+  ctx.save(); teaPath(G); ctx.clip();
   // the body of the tea: solid, milky, darker as it goes down
   const bg = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h);
   bg.addColorStop(0, '#B46C32'); bg.addColorStop(.6, '#A55F28'); bg.addColorStop(1, '#8A4A1A');
@@ -1249,7 +1239,7 @@ function teaCutaway(G, B, c, withBiscuit){
     const curve = (from, to) => { const n = 32; for (let i = 0; i <= n; i++){ const x = lerp(from, to, i / n); ctx.lineTo(x, wl(x)); } };
     const top = B.y - B.r - 4, L = B.x - B.r - 4, R = B.x + B.r + 4;
     // the biscuit darkens the tea around it: a soft shadow and a faint swell where it went in
-    ctx.save(); cupPathPhoto(G); ctx.clip();
+    ctx.save(); teaPath(G); ctx.clip();
     ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.clip();
     ctx.save(); ctx.translate(B.x + hw * .15, G.tea + dip * .3); ctx.scale(1, (dip * 1.6) / (hw * 1.35 || 1));
     const bs = ctx.createRadialGradient(0, 0, 0, 0, 0, hw * 1.35);
@@ -1279,39 +1269,6 @@ function teaCutaway(G, B, c, withBiscuit){
       ctx.restore();
     }
   }
-  // the top of the cut wall finishes level with the rim, not sloping down along its front
-  {
-    const big = () => ctx.rect(G.cx - G.a * 4, G.ry - H, G.a * 8, H * 3);
-    ctx.save();
-    cupPathPhoto(G, 0, true, true); ctx.closePath(); ctx.clip();
-    ctx.beginPath(); big(); cupPathPhoto(G, 0, false); ctx.clip('evenodd');
-    ctx.beginPath(); big(); cupPathPhoto(G, WALL, false); ctx.clip('evenodd');
-    const wg = ctx.createLinearGradient(0, G.ry, 0, G.ry + G.e * .9);
-    wg.addColorStop(0, 'rgba(238,229,212,0)'); wg.addColorStop(1, 'rgba(238,229,212,1)');
-    ctx.fillStyle = wg; ctx.fillRect(G.cx - G.a * 1.2, G.ry - G.e, G.a * 2.4, G.e * 2.5);
-    ctx.restore();
-  }
-  // near the rim the cut face melts into the inside: a soft porcelain haze over the seam
-  {
-    ctx.save(); ctx.beginPath(); ctx.rect(G.cx - G.a * 2, G.ry - G.e, G.a * 4, G.e * 3.2); ctx.clip();
-    const hz = ctx.createLinearGradient(0, G.ry - G.e * .2, 0, G.ry + G.e * 2.2);
-    hz.addColorStop(0, 'rgba(238,230,216,.5)'); hz.addColorStop(1, 'rgba(238,230,216,0)');
-    ctx.strokeStyle = hz; ctx.lineCap = 'round';
-    for (let n = 0; n < 4; n++){ ctx.lineWidth = 3 + n * 4; cupPathPhoto(G, WALL, true, true); ctx.stroke(); }
-    ctx.restore();
-  }
-  // the cut face of the wall, finished in gold like the rim
-  ctx.save(); cupPathPhoto(G, 0); ctx.clip();
-  ctx.lineJoin = 'round';
-  const gl = ctx.createLinearGradient(0, G.ry, 0, G.ry + G.e * 2.5);
-  gl.addColorStop(0, 'rgba(176,128,46,.15)'); gl.addColorStop(1, 'rgba(176,128,46,.7)');
-  ctx.strokeStyle = gl; ctx.lineWidth = 1.5; cupPathPhoto(G, WALL, true, true); ctx.stroke();
-  ctx.restore();
-  // the wall's thickness throws a soft shadow onto the tea and the far wall
-  ctx.save(); cupPathPhoto(G); ctx.clip();
-  ctx.strokeStyle = 'rgba(60,30,10,.022)';
-  for (let n = 0; n < 16; n++){ ctx.lineWidth = 2 + n * 2.2; cupPathPhoto(G, WALL, true, true); ctx.stroke(); }
-  ctx.restore();
   ctx.restore();
 }
 function drawCupBackPhoto(G, c = 0){
