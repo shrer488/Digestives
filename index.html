@@ -100,7 +100,7 @@ p{margin:0}
 .pin{position:relative}
 .sticky{position:sticky;z-index:4;top:0;height:100vh;height:100svh;overflow:hidden}
 #dunk{height:640vh}
-#bite{height:320vh}
+#bite{height:410vh}   /* the first 90vh carry on the sideways pan along the table */
 
 /* flavours grid */
 .flavours{padding-block:120px 140px}
@@ -587,7 +587,7 @@ const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jp
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp?v=2'; }
 { const L = {}; let n = 0;
   for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=6`; } }
-{ const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table-pano.jpg?v=3'; }
+{ const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table-pano.jpg?v=4'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
 }))).then(list => {
@@ -1153,7 +1153,7 @@ function tableFit(G){
   const s = Math.max(W * 1.12 / TABLE_W, (refBase + H * .25) / (TABLE_SPOT * TABLE.height));
   return {s, x0: G.cx - TABLE_W * s / 2};
 }
-const TABLE_END = 2514;   // where the long table ends in the picture, in its pixels
+const TABLE_END = 1960;   // where the long table ends in the picture, in its pixels
 function drawTable(G, top){
   if (!TABLE || !CUPIMG) return;
   // the picture is one long table: the tea end is the first TABLE_W pixels, and it runs on to the right
@@ -1771,15 +1771,18 @@ function frame(y, t){
   const an = pinState(SEC.intro, y);
   /* from the tea table to the bite the page turns sideways: scrolling down slides the tea scene off to the
      left and brings the bite in from the right, while the biscuit stays in the middle */
-  const dunkEnd = SEC.dunk.top + SEC.dunk.h - H;
-  const pan = clamp((y - dunkEnd) / Math.max(1, SEC.bite.top - dunkEnd));   // 0 → 1 over one screen of scroll
-  const panning = pan > 0 && pan < 1, panX = ease(pan) * W;
+  // the pan takes about two screens of scroll: the one between the sections and the first 90vh of the bite
+  const dunkEnd = SEC.dunk.top + SEC.dunk.h - H, PAN_E = .9 * H;
+  const pan = clamp((y - dunkEnd) / Math.max(1, SEC.bite.top + PAN_E - dunkEnd));
+  const glide = .5 - .5 * Math.cos(pan * Math.PI);        // gentle at both ends, never in a rush
+  const panning = pan > 0 && pan < 1, panX = glide * W;
   const yD = pan > 0 ? Math.min(y, dunkEnd) : y;          // the tea scene holds still while it slides away
-  const yB = panning ? SEC.bite.top : y;                   // and the bite scene is already in place as it slides in
+  // the bite's own timeline starts once the pan is done
   const dk = pinState(SEC.dunk, yD);
-  const bt = pinState(SEC.bite, yB);
+  const BITE_T = {top: SEC.bite.top + PAN_E, h: SEC.bite.h - PAN_E};
+  const bt = pinState(BITE_T, Math.max(y, BITE_T.top));
   if (STICKY.dunk) STICKY.dunk.style.transform = pan > 0 ? `translate3d(${(-panX).toFixed(1)}px, ${(y - yD).toFixed(1)}px, 0)` : '';
-  if (STICKY.bite) STICKY.bite.style.transform = panning ? `translate3d(${(W - panX).toFixed(1)}px, ${(y - SEC.bite.top).toFixed(1)}px, 0)` : '';
+  if (STICKY.bite) STICKY.bite.style.transform = panning ? `translate3d(${(W - panX).toFixed(1)}px, ${Math.min(0, y - SEC.bite.top).toFixed(1)}px, 0)` : '';
 
   /* the plain biscuit turns milk chocolate as it lands in its slot */
   const mix = 0;
@@ -1849,7 +1852,7 @@ function frame(y, t){
   // the whole tea scene, ribbons and all, rides off to the left, and the far end of the table comes in
   // the table slides far enough that its end comes to rest just right of the biscuit, where the boy sits
   const bgEnd = TABLE && CUPIMG ? (({s, x0}) => Math.max(W, x0 + TABLE_END * s - W * .64))(tableFit(geomDunk(0, 0))) : W;
-  ctx.save(); ctx.translate(-ease(pan) * bgEnd, offY);
+  ctx.save(); ctx.translate(-glide * bgEnd, offY);
   ctx.save();
   if (bandOn){
     ctx.beginPath(); domeBelow(rTop + RT); ctx.clip();
