@@ -583,7 +583,8 @@ function tint(src, color, mode, inner, paleOnly){
 const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jpg', white: 'img/white.jpg'};
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp'; }
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp'; }
-{ const im = new Image(); im.onload = () => { BOYIMG = im; }; im.src = 'img/storyboy.webp'; }
+{ const L = {}; let n = 0;
+  for (const k of ['head', 'jaw', 'lip']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=5`; } }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table.jpg'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -1556,19 +1557,31 @@ function drawProfile(F){
   ctx.fillStyle = 'rgba(110,50,35,.55)';
   ctx.beginPath(); ctx.ellipse(X(-14), Y(-16.6), 2.4 * U, 1 * U, -.25, 0, TAU); ctx.fill();
 }
-// the eater: a storybook boy in profile, painted in watercolour and ink, facing left with his mouth open
-const BOY = {lipX: 190, mouthY: 600, mouthH: 160};   // in the picture's pixels: the front of his lips, the middle of his mouth
-function drawStoryFace(F, t){
+// the eater: a storybook boy in profile, painted in watercolour and ink, facing left.
+// He comes in layers: his head; his lower face, painted at eleven jaw positions from wide open to shut;
+// and his upper lip and nose, which sit over the biscuit so it goes between his lips
+const BOY = {lipX: 190, mouthY: 600, mouthH: 160, box: [100, 500, 520, 880], frames: 11, step: .04, pad: 6};   // picture pixels
+function drawStoryFace(F, t, part){
   const s = 22 * U / BOY.mouthH;   // his mouth about as tall as a bite
-  // he leans in as he bites and sits back as he chews
-  const lean = (1 - F.open) * (F.done > 0 || F.open > 0 ? 1 : 0);
-  const chew = reduceMotion ? 0 : F.open < .05 && F.done > 0 ? Math.sin(t * 9) * .5 + .5 : 0;
-  const ang = .035 * lean + .012 * chew;
+  const engaged = F.done > 0 || F.open > 0 ? 1 : 0;
+  const chewing = !reduceMotion && F.open < .05 && F.done > 0;
+  const munch = chewing ? .5 - .5 * Math.cos(t * 9) : 0;
+  // wide open as he comes in, shut on the bite, then munching on the mouthful
+  const jaw = engaged ? (chewing ? .14 + .26 * munch : .4 * (1 - F.open)) : 0;
   ctx.save();
-  ctx.translate(F.lipsX, F.my);
-  ctx.rotate(ang);
-  ctx.translate(0, chew * .6 * U);
-  ctx.drawImage(BOYIMG, -BOY.lipX * s, -BOY.mouthY * s, BOYIMG.width * s, BOYIMG.height * s);
+  ctx.translate(F.lipsX, F.my + munch * .3 * U);
+  ctx.rotate(.03 * (1 - F.open) * engaged);
+  ctx.scale(s, s);
+  ctx.translate(-BOY.lipX, -BOY.mouthY);
+  if (part === 'back'){
+    // painted behind what is already there (destination-over), so the top layer goes first:
+    // the next jaw frame faded in, then this one, then the rest of his head
+    const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
+    const f = clamp(jaw / BOY.step, 0, BOY.frames - 1), f0 = Math.floor(f), fr = f - f0, a0 = ctx.globalAlpha;
+    if (fr > .01 && f0 + 1 < BOY.frames){ ctx.globalAlpha = a0 * fr; ctx.drawImage(BOYIMG.jaw, 0, row(f0 + 1), w, h, x0, y0, w, h); ctx.globalAlpha = a0; }
+    ctx.drawImage(BOYIMG.jaw, 0, row(f0), w, h, x0, y0, w, h);
+    ctx.drawImage(BOYIMG.head, 0, 0);
+  } else ctx.drawImage(BOYIMG.lip, 0, 0);
   ctx.restore();
 }
 function drawBittenBiscuit(B, done){
@@ -1747,7 +1760,8 @@ function frame(y, t){
   const m2e = 0;
   const M = geomBite(bt.top, b, 21 * U);
   const faceVisible = M.lipsX - 25 * U < W && M.my - 110 * U < H && M.my + 60 * U > 0 && b > 0;
-  const chewing = M.open === 0 && M.done > 0 && !reduceMotion && b < .92 ? Math.max(0, Math.sin(t * 9)) * .12 : 0;
+  // the drawn face chews by opening a little; the storybook boy chews with his own jaw frames
+  const chewing = !BOYIMG && M.open === 0 && M.done > 0 && !reduceMotion && b < .92 ? Math.max(0, Math.sin(t * 9)) * .12 : 0;
   const F = {lipsX: M.lipsX, my: M.my, open: M.open + chewing, done: M.done};
 
   /* biscuit */
@@ -1922,8 +1936,13 @@ function frame(y, t){
     // the face belongs to the next section: it only shows below the ribbon that closes the tea table
     const belowRibbon = fn => { ctx.save(); if (bandOn){ ctx.beginPath(); domeBelow(rBot + RT); ctx.clip(); } fn(); ctx.restore(); };
     belowRibbon(() => {
-      drawBittenBiscuit(B, F.done);
-      if (BOYIMG) drawStoryFace(F, t); else { drawMouthInside(F); drawProfile(F); }
+      if (BOYIMG){
+        // the biscuit goes between his lips: in front of his chin, under his upper lip
+        // the bite marks are cut out of the canvas, so the biscuit goes down first and his head slides in behind it
+        drawBittenBiscuit(B, F.done);
+        ctx.save(); ctx.globalCompositeOperation = 'destination-over'; drawStoryFace(F, t, 'back'); ctx.restore();
+        drawStoryFace(F, t, 'lip');
+      } else { drawBittenBiscuit(B, F.done); drawMouthInside(F); drawProfile(F); }
     });
     // crumbs drop from each bite
     for (let i = 0; i < BITES.length; i++){
