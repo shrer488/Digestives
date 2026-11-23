@@ -297,7 +297,9 @@ p{margin:0}
 "use strict";
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const canvas = document.getElementById('scene');
-const ctx = canvas.getContext('2d');
+let ctx = canvas.getContext('2d');
+// a layer of its own for the bite: the bite marks are cut out of it, so they must not cut through the table
+const LAYER = document.createElement('canvas'), LCTX = LAYER.getContext('2d');
 const TAU = Math.PI * 2;
 
 /* ---------- helpers ---------- */
@@ -585,7 +587,7 @@ const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jp
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp?v=2'; }
 { const L = {}; let n = 0;
   for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=6`; } }
-{ const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table.jpg?v=2'; }
+{ const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table-pano.jpg?v=3'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
 }))).then(list => {
@@ -625,7 +627,7 @@ let keys = [], SPOT = {}, PANEL_R = 0;
 function measure(){
   DPR = Math.min(2, window.devicePixelRatio || 1);
   W = window.innerWidth; H = window.innerHeight;
-  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  canvas.width = LAYER.width = Math.round(W * DPR); canvas.height = LAYER.height = Math.round(H * DPR);
   narrow = W <= 820;
   U = Math.min(W * (narrow ? .95 : .62), H * .6) / 100;
   // the tea scene is drawn in its own, bigger unit so the cup fills the screen
@@ -1120,6 +1122,7 @@ function tableCanvas(img){
 }
 // where the saucer meets the cloth in the table photo (as a share of its height)
 const TABLE_SPOT = .9;
+const TABLE_W = 1536;   // width of the tea end of the long table picture
 // the same curved gold ribbon as the packet stripe at the top of the blue (see .wash)
 const ribbonT = () => Math.min(38, Math.max(22, W * .028));
 const waveA = () => Math.min(W * .17, H * .26);
@@ -1130,7 +1133,8 @@ function domeBelow(Y){
   ctx.moveTo(-10, V(.877)); ctx.lineTo(X(0), V(.877));
   ctx.bezierCurveTo(X(.114), V(.967), X(.396), V(1.08), X(.533), V(.733));
   ctx.bezierCurveTo(X(.67), V(.342), X(.837), V(-.03), X(1), V(.012));
-  ctx.lineTo(W + 10, V(.012)); ctx.lineTo(W + 10, Y + 1e5); ctx.lineTo(-10, Y + 1e5); ctx.closePath();
+  // flat beyond the right edge, so the long table can slide in under it
+  ctx.lineTo(W + 1e5, V(.012)); ctx.lineTo(W + 1e5, Y + 1e5); ctx.lineTo(-10, Y + 1e5); ctx.closePath();
 }
 function ribbonBand(Y1, Y2, col){ ctx.fillStyle = col; ctx.beginPath(); domeBelow(Y1); domeBelow(Y2); ctx.fill('evenodd'); }
 function ribbon(Y){
@@ -1143,16 +1147,23 @@ function ribbon(Y){
   ribbonBand(Y - 3, Y + t, '#FFD777');
   ribbonBand(Y, Y + t, '#F4B63E');
 }
+// the table's scale and left edge for the pinned tea view: sized so it always covers the screen there
+function tableFit(G){
+  const k = G.k, refBase = H / 2 + 26 * CU + (PH.base - PH.cy) * k;
+  const s = Math.max(W * 1.12 / TABLE_W, (refBase + H * .25) / (TABLE_SPOT * TABLE.height));
+  return {s, x0: G.cx - TABLE_W * s / 2};
+}
+const TABLE_END = 2514;   // where the long table ends in the picture, in its pixels
 function drawTable(G, top){
   if (!TABLE || !CUPIMG) return;
-  // size it once for the pinned view so it always covers the screen there, then let it ride with the cup
-  const k = G.k, refBase = H / 2 + 26 * CU + (PH.base - PH.cy) * k;
-  const s = Math.max(W * 1.12 / TABLE.width, (refBase + H * .25) / (TABLE_SPOT * TABLE.height));
-  const w = TABLE.width * s, h = TABLE.height * s;
+  // the picture is one long table: the tea end is the first TABLE_W pixels, and it runs on to the right
+  // to where the boy sits at the far end. Sized once for the pinned view, then it rides with the cup
+  const k = G.k, {s} = tableFit(G);
+  const w = TABLE_W * s, h = TABLE.height * s;
   const base = G.ry + (PH.base - PH.cy) * k;
   const y0 = base - TABLE_SPOT * h;
   if (y0 > H || y0 + h < 0) return;
-  ctx.drawImage(TABLE, G.cx - w / 2, y0, w, h);
+  ctx.drawImage(TABLE, G.cx - w / 2, y0, TABLE.width * s, h);
 }
 function cupPhoto(G, alpha = 1){
   const k = G.k;
@@ -1831,14 +1842,18 @@ function frame(y, t){
   const z = 1 + zMax * zIn;
   const fx = W / 2, fy = H / 2;
   // the tea table lives between two gold ribbons: one where the section starts, one where it ends
+  // once the bite is pinned the table stays put; it leaves upward with the bite section
+  const offY = pan >= 1 ? pinState(SEC.bite, y).top : 0;
   const rTop = dk.top - waveA() * .35, rBot = SEC.dunk.top + SEC.dunk.h - yD, RT = ribbonT();
-  const bandOn = rTop < H && rBot > -RT && panX < W;
-  // the whole tea scene, ribbons and all, rides off to the left
-  ctx.save(); ctx.translate(-panX, 0);
+  const bandOn = rTop + offY < H && rBot + offY > -RT;
+  // the whole tea scene, ribbons and all, rides off to the left, and the far end of the table comes in
+  // the table slides far enough that its end comes to rest just right of the biscuit, where the boy sits
+  const bgEnd = TABLE && CUPIMG ? (({s, x0}) => Math.max(W, x0 + TABLE_END * s - W * .64))(tableFit(geomDunk(0, 0))) : W;
+  ctx.save(); ctx.translate(-ease(pan) * bgEnd, offY);
   ctx.save();
   if (bandOn){
     ctx.beginPath(); domeBelow(rTop + RT); ctx.clip();
-    ctx.beginPath(); ctx.rect(-10, -1e5, W + 20, 2e5); domeBelow(rBot - 8); ctx.clip('evenodd');
+    ctx.beginPath(); ctx.rect(-10, -1e5, W + 1e5, 2e5); domeBelow(rBot - 8); ctx.clip('evenodd');
   }
   // the table and the ribbon form one still frame while the scene is held: the table follows the page,
   // not the cup's rise or the camera's zoom, so nothing slides against the ribbon
@@ -1913,16 +1928,6 @@ function frame(y, t){
   ctx.restore();
   if (bandOn){ ribbon(rTop); ribbon(rBot); }
   ctx.restore();
-  // a gold stripe, like the packet's, where the tea scene gives way to the bite
-  if (panning){
-    const sx = W - panX, t = ribbonT();
-    ctx.save();
-    ctx.shadowColor = 'rgba(20,0,4,.35)'; ctx.shadowBlur = 30; ctx.shadowOffsetX = -12;
-    ctx.fillStyle = '#B07A1C'; ctx.fillRect(sx - 3, -10, t + 8, H + 20);
-    ctx.restore();
-    ctx.fillStyle = '#FFD777'; ctx.fillRect(sx - 3, -10, t + 3, H + 20);
-    ctx.fillStyle = '#F4B63E'; ctx.fillRect(sx, -10, t, H + 20);
-  }
   if (!faceVisible && !(cupVisible && bandOn && behindCup)) drawBiscuit(B);
 
   /* anatomy: one note at a time, with a marker on its feature */
@@ -1975,15 +1980,20 @@ function frame(y, t){
   /* face and the last bite */
   if (faceVisible){
     // the face belongs to the next section: it only shows below the ribbon that closes the tea table
-    const belowRibbon = fn => { ctx.save(); if (bandOn){ ctx.beginPath(); domeBelow(rBot + RT); ctx.clip(); } fn(); ctx.restore(); };
+    // he sits at the far end of the same table, so nothing clips him
+    const belowRibbon = fn => fn();
     belowRibbon(() => {
       if (BOYIMG){
         // the biscuit goes between his lips: in front of his chin, under his upper lip
         // the biscuit sits behind his face and shows through his open mouth. The bite marks are cut out of the
         // canvas, so the biscuit goes down first, the inside of his mouth slides in behind it, then his face on top
+        const main = ctx; ctx = LCTX;
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, W, H);
         drawBittenBiscuit(B, F.done);
         ctx.save(); ctx.globalCompositeOperation = 'destination-over'; drawStoryFace(F, t, 'mouth'); ctx.restore();
         drawStoryFace(F, t, 'face');
+        ctx = main;
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(LAYER, 0, 0); ctx.restore();
       } else { drawBittenBiscuit(B, F.done); drawMouthInside(F); drawProfile(F); }
     });
     // crumbs drop from each bite
