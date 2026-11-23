@@ -270,7 +270,7 @@ p{margin:0}
         <div class="panel" data-a="-1" data-b="2">
           <p class="label">v. Bite</p>
           <h2>And <em>in.</em></h2>
-          <p>Soft at the bottom, still crisp at the top, gone in one go.</p>
+          <p>Soft at the bottom, still crisp at the top. A few bites and it's gone.</p>
         </div>
       </div>
     </div>
@@ -679,9 +679,34 @@ function geomDunk(top, dd = 0){
   const ry = top + H / 2 + lerp(30 * CU, -2.9 * CU, dd);
   return {cx, ry, a: 30 * CU, b: 23 * CU, h: 34 * CU, e: 5 * CU, tea: ry + 5 * CU};
 }
-function geomBite(top, m = 0){
-  // the mouth starts just above the biscuit and closes down over it
-  return {mx: W / 2, my: top + H / 2 - 34 * U * (1 - m), mw: 24 * U};
+// the bite, seen side on: a face comes in from the right, facing left, and eats the biscuit in four bites
+const BITES = [[.14, .30], [.32, .48], [.50, .66], [.68, .84]];   // scroll windows, within the bite section
+const BITE_R = .62;                                              // bite radius, as a share of the biscuit's
+const biteX = i => 1.18 - .52 * i;                               // each bite's centre, biscuit radii right of centre
+function biteState(b, r){
+  // where the lips are (their front edge, biscuit radii from its centre), how open, and which bites are done
+  const enter = 1 + 4.2 + 1.5;   // off the right of the screen
+  let lips = enter, open = 0, done = 0;
+  const approach = ease(seg(b, 0, .12));
+  const RET = .55;   // how far the face draws back between bites, so each bite mark shows
+  lips = lerp(enter, 1 + RET, approach);
+  for (let i = 0; i < BITES.length; i++){
+    const [a0, a1] = BITES[i], p = seg(b, a0, a1);
+    if (b < a0) break;
+    const edge = i === 0 ? 1 : biteX(i - 1) - BITE_R, target = biteX(i) - BITE_R;
+    if (p < .4){ const u = ease(p / .4); lips = lerp(edge + RET, target, u); open = Math.sin(Math.min(1, p / .3) * Math.PI / 2); }
+    else if (p < .55){ lips = target; open = 1 - ease((p - .4) / .15); }
+    else { const u = ease((p - .55) / .45); lips = lerp(target, target + RET, u); open = 0; }
+    if (p >= .5) done = i + 1;
+  }
+  // after the last bite the face slides back out to the right
+  const leave = ease(seg(b, .9, 1));
+  lips = lerp(lips, enter, leave);
+  return {lips, open, done};
+}
+function geomBite(top, b, r){
+  const st = biteState(b, r);
+  return {lipsX: W / 2 + st.lips * r, my: top + H / 2, open: st.open, done: st.done};
 }
 function pose(name, y){
   const N = narrow;
@@ -1428,6 +1453,124 @@ function steam(G, t, alpha){
 }
 
 /* ---------- drawing: face ---------- */
+// a head in profile, facing left. Units of U from the corner of the mouth; the jaw hinges just in front of the ear.
+const HEAD_TOP = [[2,0],[-6,-.4],[-10.6,-.6],[-11.8,-3.6],[-10.4,-7.2],[-9.6,-10.5],[-10.2,-14],[-15.5,-16],[-19.6,-19.5],[-19.4,-24],[-14.5,-31],[-10.5,-39],[-8.2,-46],[-10.2,-52],[-11,-57],[-10.2,-65],[-7,-77],[-1,-88],[12,-98],[32,-104],[55,-102],[76,-92],[90,-72],[95,-48],[92,-24],[84,-6],[76,10],[72,40],[74,90],[80,170],[8,170],[6,100],[8,62]];
+const HEAD_JAW = [[14,50,.3],[3,46,.75],[-4,40,1],[-8.4,32,1],[-6.4,22,1],[-9.6,14.5,1],[-11,7,1],[-10.4,.6,1],[-6,.4,1],[2,.2,1]];
+const JAW_PIVOT = [38, -10];
+function headPoints(open){
+  const a = -.36 * open, ca = Math.cos(a), sa = Math.sin(a), [px, py] = JAW_PIVOT;
+  const jaw = HEAD_JAW.map(([x, y, w]) => { const dx = x - px, dy = y - py, an = a * w, c2 = Math.cos(an), s2 = Math.sin(an);
+    return [px + dx * c2 - dy * s2, py + dx * s2 + dy * c2]; });
+  return {top: HEAD_TOP, jaw, rot: ([x, y]) => [px + (x - px) * ca - (y - py) * sa, py + (x - px) * sa + (y - py) * ca]};
+}
+function splineClosed(pts, X, Y){
+  const n = pts.length, P = i => pts[(i + n) % n];
+  ctx.moveTo(X(P(0)[0]), Y(P(0)[1]));
+  for (let i = 0; i < n; i++){
+    const a = P(i - 1), b = P(i), c = P(i + 1), d = P(i + 2);
+    ctx.bezierCurveTo(X(b[0] + (c[0] - a[0]) / 6), Y(b[1] + (c[1] - a[1]) / 6), X(c[0] - (d[0] - b[0]) / 6), Y(c[1] - (d[1] - b[1]) / 6), X(c[0]), Y(c[1]));
+  }
+  ctx.closePath();
+}
+function profileGeom(F){
+  // F.lipsX is the front of the lips; the mouth's corner sits 11 units behind it
+  const mx = F.lipsX + 11 * U, my = F.my;
+  return {mx, my, X: x => mx + x * U, Y: y => my + y * U, H: headPoints(F.open)};
+}
+function drawMouthInside(F){
+  // the dark of the mouth between the lips, painted behind whatever is already there (the biscuit)
+  if (F.open < .02) return;
+  const {X, Y, H: hp} = profileGeom(F);
+  // a generous shape: the head is drawn over everything but the opening between the lips
+  const lo = hp.rot([-10.6, .6]), deep = hp.rot([30, 26]), tg1 = hp.rot([-4, 2]), tg2 = hp.rot([22, 8]);
+  ctx.save(); ctx.globalCompositeOperation = 'destination-over';
+  // the tongue first (destination-over paints underneath, so it goes in first to sit on top of the dark)
+  ctx.fillStyle = '#B04A55';
+  ctx.beginPath(); ctx.moveTo(X(tg1[0]), Y(tg1[1]));
+  ctx.quadraticCurveTo(X((tg1[0] + tg2[0]) / 2), Y(Math.min(tg1[1], tg2[1]) - 5), X(tg2[0]), Y(tg2[1]));
+  ctx.lineTo(X(deep[0]), Y(deep[1])); ctx.closePath(); ctx.fill();
+  const mg = ctx.createRadialGradient(X(-6), Y(lo[1] * .4), 0, X(4), Y(lo[1] * .4), 26 * U);
+  mg.addColorStop(0, '#4A121C'); mg.addColorStop(1, '#22060B');
+  ctx.fillStyle = mg;
+  ctx.beginPath(); ctx.moveTo(X(-11), Y(-.6)); ctx.lineTo(X(26), Y(-8)); ctx.lineTo(X(deep[0]), Y(deep[1])); ctx.lineTo(X(lo[0]), Y(lo[1])); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+function drawProfile(F){
+  const {X, Y, H: hp} = profileGeom(F);
+  const pts = [...hp.top, ...hp.jaw];
+  const head = () => { ctx.beginPath(); splineClosed(pts, X, Y); };
+  // skin, lit from the front
+  const sk = ctx.createRadialGradient(X(-6), Y(-40), 4 * U, X(30), Y(-20), 110 * U);
+  sk.addColorStop(0, '#EBBB98'); sk.addColorStop(.55, '#D49A74'); sk.addColorStop(1, '#B07452');
+  ctx.fillStyle = sk; head(); ctx.fill();
+  ctx.save(); head(); ctx.clip();
+  // shade under the jaw and down the neck
+  const jx = hp.rot([10, 48]);
+  const ng = ctx.createLinearGradient(0, Y(jx[1] - 4), 0, Y(jx[1] + 22));
+  ng.addColorStop(0, 'rgba(110,55,35,.35)'); ng.addColorStop(1, 'rgba(110,55,35,0)');
+  ctx.fillStyle = ng; ctx.fillRect(X(-20), Y(jx[1] - 4), 110 * U, 30 * U);
+  // a warm cheek
+  const ch = ctx.createRadialGradient(X(10), Y(-16), 0, X(10), Y(-16), 14 * U);
+  ch.addColorStop(0, 'rgba(214,110,100,.28)'); ch.addColorStop(1, 'rgba(214,110,100,0)');
+  ctx.fillStyle = ch; ctx.fillRect(X(-6), Y(-32), 32 * U, 32 * U);
+  // lips
+  const lo = q => hp.rot(q);
+  ctx.fillStyle = '#B5505A';
+  ctx.beginPath(); ctx.moveTo(X(-11), Y(-.5));
+  ctx.bezierCurveTo(X(-12.6), Y(-3), X(-11.4), Y(-7.6), X(-9.8), Y(-7.4));
+  ctx.quadraticCurveTo(X(-4), Y(-6), X(3), Y(-.6)); ctx.lineTo(X(2), Y(0)); ctx.closePath(); ctx.fill();
+  const l1 = lo([-11, .5]), l2 = lo([-12.2, 5]), l3 = lo([-9.6, 13.5]), l4 = lo([-3, 10]), l5 = lo([3, .8]);
+  ctx.fillStyle = '#C25A63';
+  ctx.beginPath(); ctx.moveTo(X(l1[0]), Y(l1[1])); ctx.quadraticCurveTo(X(l2[0]), Y(l2[1]), X(l3[0]), Y(l3[1]));
+  ctx.quadraticCurveTo(X(l4[0]), Y(l4[1]), X(l5[0]), Y(l5[1])); ctx.closePath(); ctx.fill();
+  ctx.restore();
+  // teeth, just inside the lips, when the mouth is open
+  if (F.open > .05){
+    ctx.save(); ctx.globalAlpha *= Math.min(1, F.open * 3);
+    const tooth = (pts) => { ctx.beginPath(); splineClosed(pts, X, Y); ctx.fill(); };
+    ctx.fillStyle = '#EDE6D8';
+    tooth([[-9.6,-.4],[-6,-.2],[-2,-.3],[-2.4,1.5],[-6,2],[-9.2,1.6]]);
+    ctx.fillStyle = '#E4DCCC';
+    tooth([[-9.2,.4],[-6,.3],[-2.4,.4],[-2.6,-1.2],[-6,-1.6],[-9,-1.2]].map(lo));
+    ctx.restore();
+  }
+  // hair
+  const hg = ctx.createLinearGradient(X(0), Y(-100), X(90), Y(0));
+  hg.addColorStop(0, '#4A2C1A'); hg.addColorStop(1, '#2A170D');
+  ctx.fillStyle = hg; ctx.beginPath();
+  splineClosed([[-5,-80],[-1,-92],[12,-102],[33,-108],[56,-106],[78,-96],[93,-75],[98,-48],[95,-22],[86,-2],[78,6],[72,-12],[66,-34],[56,-46],[44,-52],[30,-60],[16,-68],[4,-74]], X, Y); ctx.fill();
+  // ear
+  ctx.fillStyle = '#C98B66';
+  ctx.beginPath(); ctx.ellipse(X(46), Y(-28), 6.5 * U, 11 * U, .18, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,60,40,.45)'; ctx.lineWidth = 1 * U; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.ellipse(X(46.5), Y(-28), 3.6 * U, 7.5 * U, .18, -1.4, 1.9); ctx.stroke();
+  // eye, brow, nostril
+  ctx.strokeStyle = 'rgba(60,30,20,.8)'; ctx.lineWidth = 1.1 * U;
+  ctx.beginPath(); ctx.moveTo(X(-5.5), Y(-46)); ctx.quadraticCurveTo(X(-1.5), Y(-49.5), X(3), Y(-47)); ctx.stroke();
+  ctx.lineWidth = .7 * U;
+  for (let i = 0; i < 4; i++){ const x = -4.5 + i * 2.1; ctx.beginPath(); ctx.moveTo(X(x), Y(-47.4 + Math.abs(i - 1.5) * .3)); ctx.lineTo(X(x - 1.4), Y(-49.2)); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(60,35,20,.75)'; ctx.lineWidth = 1.6 * U;
+  ctx.beginPath(); ctx.moveTo(X(-8.5), Y(-55)); ctx.quadraticCurveTo(X(-2), Y(-58.5), X(6), Y(-56)); ctx.stroke();
+  ctx.fillStyle = 'rgba(110,50,35,.55)';
+  ctx.beginPath(); ctx.ellipse(X(-14), Y(-16.6), 2.4 * U, 1 * U, -.25, 0, TAU); ctx.fill();
+}
+function drawBittenBiscuit(B, done){
+  drawBiscuit(B);
+  if (!done || B.alpha <= .004) return;
+  const r = B.r, hole = (i, grow) => {
+    const cx = B.x + biteX(i) * r, cy = B.y, R = BITE_R * r * grow;
+    ctx.beginPath();
+    for (let k = 0; k <= 72; k++){ const a = k / 72 * TAU, w = R * (1 + .04 * Math.sin(a * 13 + i * 2)); k ? ctx.lineTo(cx + Math.cos(a) * w, cy + Math.sin(a) * w) : ctx.moveTo(cx + w, cy); }
+    ctx.closePath();
+  };
+  // a crumbly darker edge where the teeth went through, then the bites themselves
+  ctx.save(); ctx.beginPath(); ctx.arc(B.x, B.y, r, 0, TAU); ctx.clip();
+  for (let i = 0; i < done; i++){ hole(i, 1.05); ctx.fillStyle = 'rgba(120,70,30,.45)'; ctx.fill(); }
+  ctx.restore();
+  ctx.save(); ctx.globalCompositeOperation = 'destination-out';
+  for (let i = 0; i < done; i++){ hole(i, 1); ctx.fill(); }
+  ctx.restore();
+}
 function mouthInterior(mx, my, mw, up, dn){
   ctx.beginPath(); ctx.moveTo(mx - mw, my);
   ctx.quadraticCurveTo(mx, my - 2 * up, mx + mw, my);
@@ -1584,12 +1727,11 @@ function frame(y, t){
 
   /* bite timings */
   const b = bt.q;
-  const m2 = seg(b, .25, .6), m2e = eo(m2);
-  const M = geomBite(bt.top, m2e);
-  const faceVisible = M.my - 110 * U < H && M.my + 30 * U > 0;
-  const open = ease(seg(b, .08, .25)) * (1 - ease(seg(b, .6, .72)));
-  const chew = b > .72 && b < .97 && !reduceMotion ? Math.max(0, Math.sin(t * 8)) * .9 * U : 0;
-  const F = {mx: M.mx, my: M.my, mw: M.mw, up: open * 8 * U, dn: open * 10 * U + chew};
+  const m2e = 0;
+  const M = geomBite(bt.top, b, 21 * U);
+  const faceVisible = M.lipsX - 25 * U < W && M.my - 110 * U < H && M.my + 60 * U > 0 && b > 0;
+  const chewing = M.open === 0 && M.done > 0 && !reduceMotion && b < .92 ? Math.max(0, Math.sin(t * 9)) * .12 : 0;
+  const F = {lipsX: M.lipsX, my: M.my, open: M.open + chewing, done: M.done};
 
   /* biscuit */
   const float = reduceMotion ? 0 : Math.sin(t * 1.3) * .7 * U * (1 - zIn);
@@ -1605,8 +1747,8 @@ function frame(y, t){
     const [ox, oy] = faceToScreen(AV.ax, AV.ay, brot, tiltAxis, tiltSx);
     bx = AV.tx - br * ox; by = AV.ty - br * oy;
   }
-  br = lerp(br, 5.5 * U, m2e);
-  const alpha = 1 - seg(b, .56, .62);
+  // after the last bite there is nothing left
+  const alpha = M.done >= BITES.length ? 0 : 1;
   const sx = P.sx * tiltSx;
   const B = {
     x: bx, y: by, r: br, rot: brot, sx, axis: tiltAxis, alpha,
@@ -1617,7 +1759,6 @@ function frame(y, t){
     wetLine: -.1 - .32 * sf,
     pores: Math.floor(sf * PORES.length)
   };
-  const inMouth = m2 > .42;
   const behindCup = cupVisible && q > .05 && l < .95;
 
   // soft shadow while it floats over the page
@@ -1643,7 +1784,7 @@ function frame(y, t){
   if (bandOn) drawTable(geomDunk(dk.top, 0), dk.top);
   ctx.save();
   ctx.translate(fx, fy); ctx.scale(z, z); ctx.translate(-fx, -fy);
-  if (cupVisible){
+  if (cupVisible && bandOn){
     drawCupBack(G, c);
     steam(G, t, (1 - c) * (1 - d * (1 - l)));
     if (behindCup && !faceVisible) drawBiscuit(B);
@@ -1710,7 +1851,7 @@ function frame(y, t){
   ctx.restore();
   ctx.restore();
   if (bandOn){ ribbon(rTop); ribbon(rBot); }
-  if (!faceVisible && !(cupVisible && behindCup)) drawBiscuit(B);
+  if (!faceVisible && !(cupVisible && bandOn && behindCup)) drawBiscuit(B);
 
   /* anatomy: one note at a time, with a marker on its feature */
   {
@@ -1763,20 +1904,23 @@ function frame(y, t){
   if (faceVisible){
     // the face belongs to the next section: it only shows below the ribbon that closes the tea table
     const belowRibbon = fn => { ctx.save(); if (bandOn){ ctx.beginPath(); domeBelow(rBot + RT); ctx.clip(); } fn(); ctx.restore(); };
-    belowRibbon(() => drawFace(F));
-    if (inMouth){
-      ctx.save(); mouthInterior(F.mx, F.my, F.mw, F.up, F.dn); ctx.clip(); drawBiscuit(B); ctx.restore();
-      belowRibbon(() => drawLips(F));
-    } else { belowRibbon(() => drawLips(F)); drawBiscuit(B); }
-    const cq = seg(b, .6, .85);
-    if (cq > 0 && cq < 1){
-      for (let i = 0; i < 12; i++){
-        const dir = i % 2 ? 1 : -1, sp = .5 + hash(i + 1100);
-        const x = F.mx + dir * (F.mw * (.55 + hash(i + 1200) * .4) + cq * 16 * U * sp);
-        const yy = F.my + 2 * U - cq * 6 * U * sp + cq * cq * 34 * U;
-        ctx.save(); ctx.globalAlpha = 1 - cq; ctx.fillStyle = i % 3 ? '#C48A4C' : '#6A3B22';
-        ctx.translate(x, yy); ctx.rotate(i + cq * 4);
-        ctx.fillRect(-.6 * U, -.4 * U, (1 + hash(i) * .9) * U, .8 * U);
+    belowRibbon(() => {
+      drawBittenBiscuit(B, F.done);
+      drawMouthInside(F);
+      drawProfile(F);
+    });
+    // crumbs drop from each bite
+    for (let i = 0; i < BITES.length; i++){
+      const [a0, a1] = BITES[i], cq = seg(b, a0 + (a1 - a0) * .5, a1 + .05);
+      if (cq <= 0 || cq >= 1) continue;
+      const ex = B.x + (biteX(i) - BITE_R) * 21 * U;
+      for (let j = 0; j < 9; j++){
+        const sp = .5 + hash(j + 1100 + i * 17);
+        const x = ex + (hash(j + 1200 + i * 13) - .3) * 8 * U - cq * 6 * U * sp;
+        const yy = F.my + 4 * U - cq * 4 * U * sp + cq * cq * 46 * U;
+        ctx.save(); ctx.globalAlpha = 1 - cq; ctx.fillStyle = j % 3 ? '#C48A4C' : '#6A3B22';
+        ctx.translate(x, yy); ctx.rotate(j + cq * 4);
+        ctx.fillRect(-.6 * U, -.4 * U, (1 + hash(j) * .9) * U, .8 * U);
         ctx.restore();
       }
     }
