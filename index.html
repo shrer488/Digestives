@@ -584,7 +584,7 @@ const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jp
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp'; }
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp'; }
 { const L = {}; let n = 0;
-  for (const k of ['head', 'jaw', 'lip']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=5`; } }
+  for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=6`; } }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table.jpg'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -681,34 +681,42 @@ function geomDunk(top, dd = 0){
   const ry = top + H / 2 + lerp(30 * CU, -2.9 * CU, dd);
   return {cx, ry, a: 30 * CU, b: 23 * CU, h: 34 * CU, e: 5 * CU, tea: ry + 5 * CU};
 }
-// the bite, seen side on: a face comes in from the right, facing left, and eats the biscuit in four bites
+// the bite, seen side on: a boy comes in from the right, facing left, and eats the biscuit in four bites.
+// His mouth is narrower than the biscuit, so he nibbles the rim: between bites the biscuit turns, bringing
+// a fresh piece of edge round to him, and the last bite pops in what is left
 const BITES = [[.14, .30], [.32, .48], [.50, .66], [.68, .84]];   // scroll windows, within the bite section
-const BITE_R = .62;                                              // bite radius, as a share of the biscuit's
-const biteX = i => 1.18 - .52 * i;                               // each bite's centre, biscuit radii right of centre
+const BITE_A = [0, TAU / 3, 2 * TAU / 3, 5 * TAU / 6];            // where on the biscuit each bite lands
+const BITE_LIP = [.6, .6, .6, -.62];                               // how far in his lips go, biscuit radii from its centre
+const BITE_C = 1.5, BITE_R = .9;                                  // each bite mark: a scoop centred this far out, this big
 function biteState(b, r){
-  // where the lips are (their front edge, biscuit radii from its centre), how open, and which bites are done
+  // where the lips are (their front edge, biscuit radii from its centre), how open, which bites are done,
+  // and how far the biscuit has turned
   const enter = 1 + 4.2 + 1.5;   // off the right of the screen
-  let lips = enter, open = 0, done = 0;
-  const approach = ease(seg(b, 0, .12));
-  const RET = .55;   // how far the face draws back between bites, so each bite mark shows
-  lips = lerp(enter, 1 + RET, approach);
+  let lips = enter, open = 0, done = 0, turn = 0;
+  const RET = .55;   // how far he draws back between bites, so each bite mark shows
+  lips = lerp(enter, BITE_LIP[0] + RET, ease(seg(b, 0, .12)));
   for (let i = 0; i < BITES.length; i++){
     const [a0, a1] = BITES[i], p = seg(b, a0, a1);
     if (b < a0) break;
-    const edge = i === 0 ? 1 : biteX(i - 1) - BITE_R, target = biteX(i) - BITE_R;
-    if (p < .4){ const u = ease(p / .4); lips = lerp(edge + RET, target, u); open = Math.sin(Math.min(1, p / .3) * Math.PI / 2); }
+    const target = BITE_LIP[i], from = BITE_LIP[Math.max(0, i - 1)] + RET;
+    turn = BITE_A[i];
+    if (p < .4){ lips = lerp(from, target, ease(p / .4)); open = Math.sin(Math.min(1, p / .3) * Math.PI / 2); }
     else if (p < .55){ lips = target; open = 1 - ease((p - .4) / .15); }
-    else { const u = ease((p - .55) / .45); lips = lerp(target, target + RET, u); open = 0; }
+    else {
+      const u = ease((p - .55) / .45);
+      lips = lerp(target, BITE_LIP[Math.min(i + 1, BITES.length - 1)] > 0 ? BITE_LIP[0] + RET : target + RET, u); open = 0;
+      // while he chews, the biscuit turns to bring the next piece of rim round to him
+      if (i + 1 < BITES.length) turn = lerp(BITE_A[i], BITE_A[i + 1], u);
+    }
     if (p >= .5) done = i + 1;
   }
-  // after the last bite the face slides back out to the right
-  const leave = ease(seg(b, .9, 1));
-  lips = lerp(lips, enter, leave);
-  return {lips, open, done};
+  // after the last bite he slides back out to the right
+  lips = lerp(lips, enter, ease(seg(b, .9, 1)));
+  return {lips, open, done, turn};
 }
 function geomBite(top, b, r){
   const st = biteState(b, r);
-  return {lipsX: W / 2 + st.lips * r, my: top + H / 2, open: st.open, done: st.done};
+  return {lipsX: W / 2 + st.lips * r, my: top + H / 2, open: st.open, done: st.done, turn: st.turn};
 }
 function pose(name, y){
   const N = narrow;
@@ -1558,44 +1566,53 @@ function drawProfile(F){
   ctx.beginPath(); ctx.ellipse(X(-14), Y(-16.6), 2.4 * U, 1 * U, -.25, 0, TAU); ctx.fill();
 }
 // the eater: a storybook boy in profile, painted in watercolour and ink, facing left.
-// He comes in layers: his head; his lower face, painted at eleven jaw positions from wide open to shut;
-// and his upper lip and nose, which sit over the biscuit so it goes between his lips
-const BOY = {lipX: 190, mouthY: 600, mouthH: 160, box: [100, 500, 520, 880], frames: 11, step: .04, pad: 6};   // picture pixels
+// He comes in layers: his head; his lower face, painted at eleven jaw positions from wide open to shut, with the
+// open mouth cut out; and the inside of his mouth at the same eleven positions, which goes behind the biscuit
+const BOY = {lipX: 200, mouthY: 612, box: [100, 500, 520, 880], frames: 11, step: .04, pad: 6};   // picture pixels
 function drawStoryFace(F, t, part){
-  const s = 22 * U / BOY.mouthH;   // his mouth about as tall as a bite
+  // sized so the opening between his lips takes a good piece of the biscuit's rim
+  const s = 1.3 * 21 * U / 115;
   const engaged = F.done > 0 || F.open > 0 ? 1 : 0;
   const chewing = !reduceMotion && F.open < .05 && F.done > 0;
   const munch = chewing ? .5 - .5 * Math.cos(t * 9) : 0;
   // wide open as he comes in, shut on the bite, then munching on the mouthful
   const jaw = engaged ? (chewing ? .14 + .26 * munch : .4 * (1 - F.open)) : 0;
+  const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
+  const f = clamp(jaw / BOY.step, 0, BOY.frames - 1), f0 = Math.floor(f), fr = f - f0;
   ctx.save();
   ctx.translate(F.lipsX, F.my + munch * .3 * U);
   ctx.rotate(.03 * (1 - F.open) * engaged);
   ctx.scale(s, s);
   ctx.translate(-BOY.lipX, -BOY.mouthY);
-  if (part === 'back'){
-    // painted behind what is already there (destination-over), so the top layer goes first:
-    // the next jaw frame faded in, then this one, then the rest of his head
-    const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
-    const f = clamp(jaw / BOY.step, 0, BOY.frames - 1), f0 = Math.floor(f), fr = f - f0, a0 = ctx.globalAlpha;
-    if (fr > .01 && f0 + 1 < BOY.frames){ ctx.globalAlpha = a0 * fr; ctx.drawImage(BOYIMG.jaw, 0, row(f0 + 1), w, h, x0, y0, w, h); ctx.globalAlpha = a0; }
-    ctx.drawImage(BOYIMG.jaw, 0, row(f0), w, h, x0, y0, w, h);
+  const frame = (img, a) => {
+    if (a){ const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * fr; ctx.drawImage(img, 0, row(f0 + 1), w, h, x0, y0, w, h); ctx.globalAlpha = a0; }
+    else ctx.drawImage(img, 0, row(f0), w, h, x0, y0, w, h);
+  };
+  const blend = fr > .01 && f0 + 1 < BOY.frames;
+  if (part === 'mouth'){
+    // painted behind what is already there (destination-over), so the top layer goes first
+    if (blend) frame(BOYIMG.mouth, true);
+    frame(BOYIMG.mouth, false);
+  } else {
     ctx.drawImage(BOYIMG.head, 0, 0);
-  } else ctx.drawImage(BOYIMG.lip, 0, 0);
+    frame(BOYIMG.jaw, false);
+    if (blend) frame(BOYIMG.jaw, true);
+  }
   ctx.restore();
 }
 function drawBittenBiscuit(B, done){
   drawBiscuit(B);
   if (!done || B.alpha <= .004) return;
+  // each mark turns with the biscuit
   const r = B.r, hole = (i, grow) => {
-    const cx = B.x + biteX(i) * r, cy = B.y, R = BITE_R * r * grow;
+    const a = BITE_A[i] + B.rot, cx = B.x + Math.cos(a) * BITE_C * r, cy = B.y + Math.sin(a) * BITE_C * r, R = BITE_R * r * grow;
     ctx.beginPath();
-    for (let k = 0; k <= 72; k++){ const a = k / 72 * TAU, w = R * (1 + .04 * Math.sin(a * 13 + i * 2)); k ? ctx.lineTo(cx + Math.cos(a) * w, cy + Math.sin(a) * w) : ctx.moveTo(cx + w, cy); }
+    for (let k = 0; k <= 96; k++){ const t = k / 96 * TAU, w = R * (1 + .025 * Math.sin(t * 19 + i * 2) + .012 * Math.sin(t * 41 + i)); k ? ctx.lineTo(cx + Math.cos(t) * w, cy + Math.sin(t) * w) : ctx.moveTo(cx + w, cy); }
     ctx.closePath();
   };
   // a crumbly darker edge where the teeth went through, then the bites themselves
   ctx.save(); ctx.beginPath(); ctx.arc(B.x, B.y, r, 0, TAU); ctx.clip();
-  for (let i = 0; i < done; i++){ hole(i, 1.05); ctx.fillStyle = 'rgba(120,70,30,.45)'; ctx.fill(); }
+  for (let i = 0; i < done; i++){ hole(i, 1.04); ctx.fillStyle = 'rgba(120,70,30,.45)'; ctx.fill(); }
   ctx.restore();
   ctx.save(); ctx.globalCompositeOperation = 'destination-out';
   for (let i = 0; i < done; i++){ hole(i, 1); ctx.fill(); }
@@ -1782,7 +1799,7 @@ function frame(y, t){
   const alpha = M.done >= BITES.length ? 0 : 1;
   const sx = P.sx * tiltSx;
   const B = {
-    x: bx, y: by, r: br, rot: brot, sx, axis: tiltAxis, alpha,
+    x: bx, y: by, r: br, rot: brot - (b > 0 ? M.turn : 0), sx, axis: tiltAxis, alpha,
     tex: sx < 0 ? TEXTURES.milk : TEXTURES.under,
     tex2: null, mix: 0,
     // dry until it has actually gone into the tea
@@ -1938,17 +1955,18 @@ function frame(y, t){
     belowRibbon(() => {
       if (BOYIMG){
         // the biscuit goes between his lips: in front of his chin, under his upper lip
-        // the bite marks are cut out of the canvas, so the biscuit goes down first and his head slides in behind it
+        // the biscuit sits behind his face and shows through his open mouth. The bite marks are cut out of the
+        // canvas, so the biscuit goes down first, the inside of his mouth slides in behind it, then his face on top
         drawBittenBiscuit(B, F.done);
-        ctx.save(); ctx.globalCompositeOperation = 'destination-over'; drawStoryFace(F, t, 'back'); ctx.restore();
-        drawStoryFace(F, t, 'lip');
+        ctx.save(); ctx.globalCompositeOperation = 'destination-over'; drawStoryFace(F, t, 'mouth'); ctx.restore();
+        drawStoryFace(F, t, 'face');
       } else { drawBittenBiscuit(B, F.done); drawMouthInside(F); drawProfile(F); }
     });
     // crumbs drop from each bite
     for (let i = 0; i < BITES.length; i++){
       const [a0, a1] = BITES[i], cq = seg(b, a0 + (a1 - a0) * .5, a1 + .05);
       if (cq <= 0 || cq >= 1) continue;
-      const ex = B.x + (biteX(i) - BITE_R) * 21 * U;
+      const ex = B.x + Math.max(BITE_LIP[i], .3) * 21 * U;
       for (let j = 0; j < 9; j++){
         const sp = .5 + hash(j + 1100 + i * 17);
         const x = ex + (hash(j + 1200 + i * 13) - .3) * 8 * U - cq * 6 * U * sp;
