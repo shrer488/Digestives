@@ -185,7 +185,6 @@ p{margin:0}
 <body>
 
 
-
 <div class="wash" aria-hidden="true"></div>
 <div class="wheat" aria-hidden="true"></div>
 <canvas id="scene" aria-hidden="true"></canvas>
@@ -613,7 +612,8 @@ const PORES = (() => {
 
 /* ---------- layout measurement ---------- */
 var CU = 1, CUPIMG = null, CUPSHADOW = null, TABLE = null;
-const PH = {cx: 758, cy: 203.5, rx: 366, ry: 48.5, teaDy: 9, trx: 352, try: 44, bowl: 650, base: 887};
+const PH = {cx: 758, cy: 203.5, rx: 366, ry: 48.5, teaDy: 150, trx: 321, try: 40, bowl: 650, base: 887};
+const WALL = 16;   // how thick the cut-away cup wall reads, in screen px
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
 const sections = [...document.querySelectorAll('[data-pose]')].map(el => ({el, name: el.dataset.pose, pin: el.classList.contains('pin'), top: 0, h: 0}));
 const SEC = Object.fromEntries(sections.map(s => [s.name, s]));
@@ -673,7 +673,7 @@ function geomDunk(top, dd = 0){
     // the photographed cup, seen from a little above: its gold rim is an ellipse 732 x 97 px centred at (758, 203)
     const a = 30 * CU, k = a / PH.rx, teaDy = PH.teaDy * k;
     const ry = top + H / 2 + lerp(26 * CU, .1 * 21 * CU - teaDy, dd);
-    return {cx, ry, a, b: 0, h: (PH.bowl - PH.cy) * k, e: PH.ry * k, tea: ry + teaDy, k, trx: PH.trx * k, try: PH.try * k};
+    return {cx, ry, a, b: 0, h: (PH.bowl - PH.cy) * k, e: PH.ry * k, tea: ry + teaDy, k, trx: PH.trx * k - WALL, try: (PH.trx * k - WALL) * PH.try / PH.trx};
   }
   const ry = top + H / 2 + lerp(30 * CU, -2.9 * CU, dd);
   return {cx, ry, a: 30 * CU, b: 23 * CU, h: 34 * CU, e: 5 * CU, tea: ry + 5 * CU};
@@ -1125,9 +1125,9 @@ function cupPhoto(G, alpha = 1){
 // the bowl's outline in the photo, for the see-through view of the tea
 const BOWL_L = [[395, 206], [399, 226], [407, 246], [413, 266], [419, 286], [425, 306], [430, 326], [436, 346], [440, 366], [445, 386], [451, 406], [457, 426], [463, 446], [469, 466], [478, 486], [500, 520], [520, 540], [540, 557], [560, 577], [580, 594], [600, 607], [615, 617], [640, 627]];
 const BOWL_R = [[880, 622], [900, 615], [920, 607], [940, 597], [955, 585], [975, 568], [995, 550], [1012, 526], [1039, 486], [1048, 466], [1055, 446], [1061, 426], [1066, 406], [1072, 386], [1077, 366], [1083, 346], [1092, 326], [1096, 306], [1103, 286], [1106, 266], [1112, 246], [1120, 226], [1123, 206]];
-function cupPathPhoto(G){
+function cupPathPhoto(G, w = WALL, fresh = true, open = false){
   const k = G.k, X = x => G.cx + (x - PH.cx) * k, Y = y => G.ry + (y - PH.cy) * k;
-  ctx.beginPath();
+  if (fresh) ctx.beginPath();
   // the cup's edge, found pixel by pixel in the photo: flared walls rolling in to the stem
   const through = pts => {
     const p = [pts[0], ...pts, pts[pts.length - 1]];
@@ -1136,20 +1136,126 @@ function cupPathPhoto(G){
       ctx.bezierCurveTo(X(b[0] + (c[0] - a[0]) / 6), Y(b[1] + (c[1] - a[1]) / 6), X(c[0] - (d[0] - b[0]) / 6), Y(c[1] - (d[1] - b[1]) / 6), X(c[0]), Y(c[1]));
     }
   };
-  // pull the whole outline 1 screen px inside the cup's edge
-  const d = 1 / k;
+  // w = 0 is the cup's outside; w > 0 is the inside face of a wall that thick
+  const d = w / k;
   const inset = pts => pts.map((q, n) => {
     const a = pts[Math.max(0, n - 1)], b = pts[Math.min(pts.length - 1, n + 1)];
     const tx = b[0] - a[0], ty = b[1] - a[1], l = Math.hypot(tx, ty) || 1;
     return [q[0] + ty / l * d, q[1] - tx / l * d];
   });
-  const L = inset(BOWL_L), R = inset(BOWL_R);
+  // iron out the pixel-by-pixel wobble so the walls sweep in one clean curve
+  const smooth = (pts, passes = 6) => {
+    let q = pts;
+    for (let i = 0; i < passes; i++)
+      q = q.map((c, n) => n === 0 || n === q.length - 1 ? c
+        : [(q[n - 1][0] + 2 * c[0] + q[n + 1][0]) / 4, (q[n - 1][1] + 2 * c[1] + q[n + 1][1]) / 4]);
+    return q;
+  };
+  const L = smooth(inset(BOWL_L)), R = smooth(inset(BOWL_R));
   ctx.moveTo(X(L[0][0]), Y(L[0][1]));
   through(L);
   ctx.quadraticCurveTo(X(760), Y(640 - d), X(R[0][0]), Y(R[0][1]));
   through(R);
-  ctx.ellipse(G.cx, G.ry, G.a - 1, G.e - 1, 0, 0, Math.PI, false);
+  if (open) return;
+  // the top follows the rim's own front edge, so no strip of porcelain crosses the cup
+  ctx.ellipse(G.cx, G.ry, G.a - w, G.e, 0, 0, Math.PI, false);
   ctx.closePath();
+}
+function teaCutaway(G, B, c, withBiscuit){
+  // cut open, the surface is shown a little more from above so it reads as a plane
+  G = Object.assign({}, G, {try: G.trx * .24});
+  ctx.save(); ctx.globalAlpha = c;
+  ctx.save(); cupPathPhoto(G); ctx.clip();
+  // the inside of the far wall, curving away into shadow
+  const ig = ctx.createLinearGradient(0, G.ry, 0, G.tea + G.try);
+  ig.addColorStop(0, '#F3EBDD'); ig.addColorStop(1, '#D8C7AC');
+  ctx.fillStyle = ig; ctx.fillRect(G.cx - G.a * 1.5, G.ry - G.e, G.a * 3, G.h * 2);
+  const sg = ctx.createLinearGradient(G.cx - G.a, 0, G.cx + G.a, 0);
+  sg.addColorStop(0, 'rgba(120,90,60,.28)'); sg.addColorStop(.25, 'rgba(120,90,60,0)');
+  sg.addColorStop(.75, 'rgba(120,90,60,0)'); sg.addColorStop(1, 'rgba(120,90,60,.28)');
+  ctx.fillStyle = sg; ctx.fillRect(G.cx - G.a * 1.5, G.ry - G.e, G.a * 3, G.h * 2);
+  // the body of the tea: solid, milky, darker as it goes down
+  const bg = ctx.createLinearGradient(0, G.tea, 0, G.ry + G.h);
+  bg.addColorStop(0, '#B46C32'); bg.addColorStop(.6, '#A55F28'); bg.addColorStop(1, '#8A4A1A');
+  ctx.fillStyle = bg; ctx.fillRect(G.cx - G.a * 1.5, G.tea, G.a * 3, G.h * 2);
+  const eg = ctx.createLinearGradient(G.cx - G.a, 0, G.cx + G.a, 0);
+  eg.addColorStop(0, 'rgba(80,36,10,.3)'); eg.addColorStop(.2, 'rgba(80,36,10,0)');
+  eg.addColorStop(.8, 'rgba(80,36,10,0)'); eg.addColorStop(1, 'rgba(80,36,10,.3)');
+  ctx.fillStyle = eg; ctx.fillRect(G.cx - G.a * 1.5, G.tea, G.a * 3, G.h * 2);
+  // the flat surface, a touch lighter, with a ring of froth where it meets the porcelain
+  const tg = ctx.createRadialGradient(G.cx - G.trx * .2, G.tea - G.try * .3, G.trx * .1, G.cx, G.tea, G.trx);
+  tg.addColorStop(0, '#DDA066'); tg.addColorStop(1, '#C27E44');
+  ctx.fillStyle = tg; ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.clip();
+  // the far side sits in the cup's shadow; the window catches the near left
+  const lg = ctx.createLinearGradient(0, G.tea - G.try, 0, G.tea + G.try);
+  lg.addColorStop(0, 'rgba(90,44,14,.35)'); lg.addColorStop(.5, 'rgba(90,44,14,0)'); lg.addColorStop(1, 'rgba(255,225,180,.12)');
+  ctx.fillStyle = lg; ctx.fillRect(G.cx - G.trx, G.tea - G.try, G.trx * 2, G.try * 2);
+  const sh = ctx.createRadialGradient(G.cx - G.trx * .45, G.tea + G.try * .25, 0, G.cx - G.trx * .45, G.tea + G.try * .25, G.trx * .35);
+  sh.addColorStop(0, 'rgba(255,236,205,.28)'); sh.addColorStop(1, 'rgba(255,236,205,0)');
+  ctx.fillStyle = sh; ctx.fillRect(G.cx - G.trx, G.tea - G.try, G.trx * 2, G.try * 2);
+  // a soft collar of froth where the tea meets the porcelain, no outlines
+  ctx.lineWidth = G.try * .35; ctx.strokeStyle = 'rgba(236,196,146,.18)';
+  ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.stroke();
+  ctx.lineWidth = G.try * .15; ctx.strokeStyle = 'rgba(244,212,168,.22)';
+  ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.stroke();
+  ctx.restore();
+  // just under the near lip the body is a shade darker: the surface's edge, made by light not a line
+  ctx.save(); ctx.beginPath(); ctx.rect(G.cx - G.a * 1.5, G.tea, G.a * 3, G.h);
+  ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.clip('evenodd');
+  const ug = ctx.createLinearGradient(0, G.tea + G.try, 0, G.tea + G.try * 2.2);
+  ug.addColorStop(0, 'rgba(70,30,8,.28)'); ug.addColorStop(1, 'rgba(70,30,8,0)');
+  ctx.fillStyle = ug; ctx.fillRect(G.cx - G.a * 1.5, G.tea, G.a * 3, G.try * 2.5);
+  ctx.restore();
+  ctx.restore();
+  if (withBiscuit){
+    // where the biscuit breaks the surface: the waterline follows the surface's curve across the biscuit
+    const hw = Math.sqrt(Math.max(0, B.r * B.r - (G.tea - B.y) ** 2));
+    const dip = G.try * .55;
+    const wl = x => { const u = (x - B.x) / (hw || 1); return G.tea + dip * Math.sqrt(Math.max(0, 1 - u * u)); };
+    const curve = (from, to) => { const n = 32; for (let i = 0; i <= n; i++){ const x = lerp(from, to, i / n); ctx.lineTo(x, wl(x)); } };
+    const top = B.y - B.r - 4, L = B.x - B.r - 4, R = B.x + B.r + 4;
+    // the biscuit darkens the tea around it: a soft shadow and a faint swell where it went in
+    ctx.save(); cupPathPhoto(G); ctx.clip();
+    ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.clip();
+    ctx.save(); ctx.translate(B.x + hw * .15, G.tea + dip * .3); ctx.scale(1, (dip * 1.6) / (hw * 1.35 || 1));
+    const bs = ctx.createRadialGradient(0, 0, 0, 0, 0, hw * 1.35);
+    bs.addColorStop(0, 'rgba(70,30,8,.35)'); bs.addColorStop(.6, 'rgba(70,30,8,.12)'); bs.addColorStop(1, 'rgba(70,30,8,0)');
+    ctx.fillStyle = bs; ctx.beginPath(); ctx.arc(0, 0, hw * 1.35, 0, TAU); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.translate(B.x, G.tea + dip * .9); ctx.scale(1, (dip * 1.2) / (hw * 1.2 || 1));
+    const sw = ctx.createRadialGradient(0, 0, hw * .7, 0, 0, hw * 1.2);
+    sw.addColorStop(0, 'rgba(255,225,180,0)'); sw.addColorStop(.5, 'rgba(255,225,180,.1)'); sw.addColorStop(1, 'rgba(255,225,180,0)');
+    ctx.fillStyle = sw; ctx.beginPath(); ctx.arc(0, 0, hw * 1.2, 0, TAU); ctx.fill(); ctx.restore();
+    ctx.restore();
+    // the biscuit, only the part standing out of the tea
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(L, top); ctx.lineTo(R, top); ctx.lineTo(R, G.tea); ctx.lineTo(B.x + hw, wl(B.x + hw));
+    curve(B.x + hw, B.x - hw); ctx.lineTo(L, G.tea); ctx.closePath(); ctx.clip();
+    drawBiscuit(B);
+    ctx.restore();
+    // the tea climbing a touch up the biscuit, catching the light
+    if (hw > 0){
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      // wet crumb darkening just above the waterline, fading upward
+      for (let n = 0; n < 4; n++){
+        ctx.strokeStyle = `rgba(110,55,18,${.12})`; ctx.lineWidth = 3 + n * 4;
+        ctx.beginPath(); ctx.moveTo(B.x - hw, wl(B.x - hw) - 1); curve(B.x - hw, B.x + hw); ctx.stroke();
+      }
+      ctx.strokeStyle = 'rgba(255,232,195,.3)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(B.x - hw, wl(B.x - hw) + 1); curve(B.x - hw, B.x + hw); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  // the cut face of the wall, finished in gold like the rim
+  ctx.save(); cupPathPhoto(G, 0); ctx.clip();
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(176,128,46,.7)'; ctx.lineWidth = 1.5; cupPathPhoto(G, WALL, true, true); ctx.stroke();
+  ctx.restore();
+  // the wall's thickness throws a soft shadow onto the tea and the far wall
+  ctx.save(); cupPathPhoto(G); ctx.clip();
+  for (let n = 0; n < 5; n++){ ctx.strokeStyle = 'rgba(60,30,10,.07)'; ctx.lineWidth = 4 + n * 6; cupPathPhoto(G, WALL, true, true); ctx.stroke(); }
+  ctx.restore();
+  ctx.restore();
 }
 function drawCupBackPhoto(G, c = 0){
   const k = G.k, by = G.ry + (PH.base - PH.cy) * k;
@@ -1169,16 +1275,23 @@ function drawCupBackPhoto(G, c = 0){
   // everything but the bowl stays solid; the bowl fades when we look inside the cup
   ctx.save(); cupPathPhoto(G); ctx.rect(G.cx - G.a * 4, G.ry - H, G.a * 8, H * 3); ctx.clip('evenodd'); cupPhoto(G); ctx.restore();
   ctx.save(); cupPathPhoto(G); ctx.clip(); cupPhoto(G, 1 - .9 * c); ctx.restore();
-  // tea in the bowl, with a soft meniscus where it meets the porcelain
+  // tea sits well down in the bowl: from above you see it through the rim, below the inside wall
+  ctx.save(); ctx.beginPath(); ctx.ellipse(G.cx, G.ry, G.a - 2, G.e - 2, 0, 0, TAU); ctx.clip(); teaSurface(G); ctx.restore();
+  // cut away, the whole surface shows through the wall
+  if (c > 0){ ctx.save(); cupPathPhoto(G); ctx.clip(); ctx.globalAlpha = c; teaSurface(G); ctx.restore(); }
+}
+function teaSurface(G){
   const tg = ctx.createRadialGradient(G.cx - G.trx * .3, G.tea - G.try * .4, G.trx * .1, G.cx, G.tea, G.trx);
   tg.addColorStop(0, '#A85A24'); tg.addColorStop(.7, '#7A3A12'); tg.addColorStop(1, '#5E2A0C');
   ctx.fillStyle = tg; ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.fill();
-  ctx.strokeStyle = 'rgba(200,150,100,.35)'; ctx.lineWidth = 1.2 * k * 4;
+  // a soft meniscus where it meets the porcelain
+  ctx.strokeStyle = 'rgba(200,150,100,.35)'; ctx.lineWidth = 4.8 * G.k;
   ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.stroke();
 }
 function teaFrontPhoto(G, alpha){
   if (alpha <= 0) return;
   ctx.save(); ctx.globalAlpha = alpha;
+  ctx.beginPath(); ctx.ellipse(G.cx, G.ry, G.a - 2, G.e - 2, 0, 0, TAU); ctx.clip();
   const tg = ctx.createRadialGradient(G.cx - G.trx * .3, G.tea - G.try * .4, G.trx * .1, G.cx, G.tea, G.trx);
   tg.addColorStop(0, '#A85A24'); tg.addColorStop(.7, '#7A3A12'); tg.addColorStop(1, '#5E2A0C');
   ctx.fillStyle = tg;
@@ -1190,11 +1303,22 @@ function teaFrontPhoto(G, alpha){
 function drawCupFrontPhoto(G, c){
   // redraw the photo over everything below the front of the rim, so the cup wall hides the biscuit
   // only the bowl wall: the saucer, foot and handle stay solid from the layer behind
+  // the wall itself (outside edge to inside face) stays solid porcelain, so the cup reads as cut in half
+  ctx.save(); cupPathPhoto(G, 0); cupPathPhoto(G, WALL, false); ctx.clip('evenodd'); cupPhoto(G); ctx.restore();
   ctx.save(); cupPathPhoto(G); ctx.clip(); cupPhoto(G, 1 - .88 * c); ctx.restore();
-  if (c > 0){
-    ctx.save(); ctx.strokeStyle = COL.ink; ctx.globalAlpha = .25 + .4 * c; ctx.lineWidth = .3 * CU; ctx.setLineDash([1.4 * CU, 1.1 * CU]);
-    cupPathPhoto(G); ctx.stroke(); ctx.restore();
-  }
+  if (c <= 0) return;
+  // the tea darkens where it meets the wall, and the cut face of the porcelain catches the light
+  ctx.save(); cupPathPhoto(G); ctx.clip();
+  ctx.strokeStyle = `rgba(70,32,10,${.07 * c})`;
+  for (let i = 0; i < 6; i++){ ctx.lineWidth = 3 + i * 5; cupPathPhoto(G); ctx.stroke(); }
+  ctx.restore();
+  // the tea's surface, seen side-on through the cut: a bright meniscus ring
+  ctx.save(); cupPathPhoto(G); ctx.clip();
+  ctx.fillStyle = `rgba(255,205,150,${.16 * c})`;
+  ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.fill();
+  ctx.strokeStyle = `rgba(255,228,190,${.6 * c})`; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.ellipse(G.cx, G.tea, G.trx, G.try, 0, 0, TAU); ctx.stroke();
+  ctx.restore();
 }
 function drawCupBackDrawn(G){
   const {cx, ry, a, e, tea} = G, u = CU;
@@ -1561,6 +1685,9 @@ function frame(y, t){
       ctx.restore();
     }
     drawCupFront(G, c);
+    // cut away: the front of the cup is gone. Inside, cream porcelain; the tea is a solid, milky body
+    // with a flat surface; the biscuit stands in it, hidden below the waterline
+    if (c > .01) teaCutaway(G, B, c, behindCup && !faceVisible);
     const dripA = seg(q, .76, .8) * (1 - seg(q, .96, 1));
     if (dripA > 0 && !reduceMotion){
       ctx.save(); ctx.globalAlpha = dripA;
