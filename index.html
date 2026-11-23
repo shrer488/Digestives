@@ -620,6 +620,7 @@ const WALL = 16;   // how thick the cut-away cup wall reads, in screen px
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
 const sections = [...document.querySelectorAll('[data-pose]')].map(el => ({el, name: el.dataset.pose, pin: el.classList.contains('pin'), top: 0, h: 0}));
 const SEC = Object.fromEntries(sections.map(s => [s.name, s]));
+const STICKY = {dunk: SEC.dunk.el.querySelector('.sticky'), bite: SEC.bite.el.querySelector('.sticky')};
 let keys = [], SPOT = {}, PANEL_R = 0;
 function measure(){
   DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -629,6 +630,7 @@ function measure(){
   U = Math.min(W * (narrow ? .95 : .62), H * .6) / 100;
   // the tea scene is drawn in its own, bigger unit so the cup fills the screen
   CU = U * (narrow ? 1.05 : 2);
+  STICKY.dunk.style.transform = STICKY.bite.style.transform = '';
   sections.forEach(s => { const r = s.el.getBoundingClientRect(); s.top = r.top + window.scrollY; s.h = s.el.offsetHeight; });
   { const pr = SEC.dunk.el.querySelector('.panels').getBoundingClientRect(); PANEL_R = pr.right; }
   SPOT = {};
@@ -1756,8 +1758,17 @@ function frame(y, t){
 
   const P = poseAt(y);
   const an = pinState(SEC.intro, y);
-  const dk = pinState(SEC.dunk, y);
-  const bt = pinState(SEC.bite, y);
+  /* from the tea table to the bite the page turns sideways: scrolling down slides the tea scene off to the
+     left and brings the bite in from the right, while the biscuit stays in the middle */
+  const dunkEnd = SEC.dunk.top + SEC.dunk.h - H;
+  const pan = clamp((y - dunkEnd) / Math.max(1, SEC.bite.top - dunkEnd));   // 0 → 1 over one screen of scroll
+  const panning = pan > 0 && pan < 1, panX = ease(pan) * W;
+  const yD = pan > 0 ? Math.min(y, dunkEnd) : y;          // the tea scene holds still while it slides away
+  const yB = panning ? SEC.bite.top : y;                   // and the bite scene is already in place as it slides in
+  const dk = pinState(SEC.dunk, yD);
+  const bt = pinState(SEC.bite, yB);
+  if (STICKY.dunk) STICKY.dunk.style.transform = pan > 0 ? `translate3d(${(-panX).toFixed(1)}px, ${(y - yD).toFixed(1)}px, 0)` : '';
+  if (STICKY.bite) STICKY.bite.style.transform = panning ? `translate3d(${(W - panX).toFixed(1)}px, ${(y - SEC.bite.top).toFixed(1)}px, 0)` : '';
 
   /* the plain biscuit turns milk chocolate as it lands in its slot */
   const mix = 0;
@@ -1820,8 +1831,10 @@ function frame(y, t){
   const z = 1 + zMax * zIn;
   const fx = W / 2, fy = H / 2;
   // the tea table lives between two gold ribbons: one where the section starts, one where it ends
-  const rTop = dk.top - waveA() * .35, rBot = SEC.dunk.top + SEC.dunk.h - y, RT = ribbonT();
-  const bandOn = rTop < H && rBot > -RT;
+  const rTop = dk.top - waveA() * .35, rBot = SEC.dunk.top + SEC.dunk.h - yD, RT = ribbonT();
+  const bandOn = rTop < H && rBot > -RT && panX < W;
+  // the whole tea scene, ribbons and all, rides off to the left
+  ctx.save(); ctx.translate(-panX, 0);
   ctx.save();
   if (bandOn){
     ctx.beginPath(); domeBelow(rTop + RT); ctx.clip();
@@ -1899,6 +1912,17 @@ function frame(y, t){
   ctx.restore();
   ctx.restore();
   if (bandOn){ ribbon(rTop); ribbon(rBot); }
+  ctx.restore();
+  // a gold stripe, like the packet's, where the tea scene gives way to the bite
+  if (panning){
+    const sx = W - panX, t = ribbonT();
+    ctx.save();
+    ctx.shadowColor = 'rgba(20,0,4,.35)'; ctx.shadowBlur = 30; ctx.shadowOffsetX = -12;
+    ctx.fillStyle = '#B07A1C'; ctx.fillRect(sx - 3, -10, t + 8, H + 20);
+    ctx.restore();
+    ctx.fillStyle = '#FFD777'; ctx.fillRect(sx - 3, -10, t + 3, H + 20);
+    ctx.fillStyle = '#F4B63E'; ctx.fillRect(sx, -10, t, H + 20);
+  }
   if (!faceVisible && !(cupVisible && bandOn && behindCup)) drawBiscuit(B);
 
   /* anatomy: one note at a time, with a marker on its feature */
