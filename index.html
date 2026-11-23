@@ -583,6 +583,7 @@ function tint(src, color, mode, inner, paleOnly){
 const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jpg', white: 'img/white.jpg'};
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp'; }
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp'; }
+{ const im = new Image(); im.onload = () => { BOYIMG = im; }; im.src = 'img/storyboy.webp'; }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table.jpg'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -612,7 +613,7 @@ const PORES = (() => {
 })();
 
 /* ---------- layout measurement ---------- */
-var CU = 1, CUTIMG = null, CUPIMG = null, CUPSHADOW = null, TABLE = null;
+var CU = 1, BOYIMG = null, CUTIMG = null, CUPIMG = null, CUPSHADOW = null, TABLE = null;
 const PH = {cx: 758, cy: 203.5, rx: 366, ry: 48.5, teaDy: 150, trx: 321, try: 40, bowl: 650, base: 887};
 const WALL = 16;   // how thick the cut-away cup wall reads, in screen px
 let W = 0, H = 0, U = 1, DPR = 1, narrow = false;
@@ -1555,6 +1556,21 @@ function drawProfile(F){
   ctx.fillStyle = 'rgba(110,50,35,.55)';
   ctx.beginPath(); ctx.ellipse(X(-14), Y(-16.6), 2.4 * U, 1 * U, -.25, 0, TAU); ctx.fill();
 }
+// the eater: a storybook boy in profile, painted in watercolour and ink, facing left with his mouth open
+const BOY = {lipX: 190, mouthY: 600, mouthH: 160};   // in the picture's pixels: the front of his lips, the middle of his mouth
+function drawStoryFace(F, t){
+  const s = 22 * U / BOY.mouthH;   // his mouth about as tall as a bite
+  // he leans in as he bites and sits back as he chews
+  const lean = (1 - F.open) * (F.done > 0 || F.open > 0 ? 1 : 0);
+  const chew = reduceMotion ? 0 : F.open < .05 && F.done > 0 ? Math.sin(t * 9) * .5 + .5 : 0;
+  const ang = .035 * lean + .012 * chew;
+  ctx.save();
+  ctx.translate(F.lipsX, F.my);
+  ctx.rotate(ang);
+  ctx.translate(0, chew * .6 * U);
+  ctx.drawImage(BOYIMG, -BOY.lipX * s, -BOY.mouthY * s, BOYIMG.width * s, BOYIMG.height * s);
+  ctx.restore();
+}
 function drawBittenBiscuit(B, done){
   drawBiscuit(B);
   if (!done || B.alpha <= .004) return;
@@ -1907,8 +1923,7 @@ function frame(y, t){
     const belowRibbon = fn => { ctx.save(); if (bandOn){ ctx.beginPath(); domeBelow(rBot + RT); ctx.clip(); } fn(); ctx.restore(); };
     belowRibbon(() => {
       drawBittenBiscuit(B, F.done);
-      drawMouthInside(F);
-      drawProfile(F);
+      if (BOYIMG) drawStoryFace(F, t); else { drawMouthInside(F); drawProfile(F); }
     });
     // crumbs drop from each bite
     for (let i = 0; i < BITES.length; i++){
