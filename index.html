@@ -1279,7 +1279,8 @@ function teaCutaway(G, B, c, withBiscuit){
     ctx.save();
     ctx.beginPath(); ctx.moveTo(L, top); ctx.lineTo(R, top); ctx.lineTo(R, G.tea); ctx.lineTo(B.x + hw, wl(B.x + hw));
     curve(B.x + hw, B.x - hw); ctx.lineTo(L, G.tea); ctx.closePath(); ctx.clip();
-    drawBiscuit(B);
+    // it fades with the cut-away: drawBiscuit sets its own alpha, so hand it the fade
+    drawBiscuit(Object.assign({}, B, {alpha: B.alpha * c, lift: 0}));
     ctx.restore();
     // the tea climbing a touch up the biscuit, catching the light
     if (hw > 0){
