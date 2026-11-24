@@ -584,7 +584,7 @@ const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jp
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp?v=2'; }
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp?v=2'; }
 { const L = {}; let n = 0;
-  for (const k of ['seat', 'seatjaw']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 2) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=1`; } }
+  for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=7`; } }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table-pano.jpg?v=5'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -1576,30 +1576,39 @@ function drawProfile(F){
   ctx.fillStyle = 'rgba(110,50,35,.55)';
   ctx.beginPath(); ctx.ellipse(X(-14), Y(-16.6), 2.4 * U, 1 * U, -.25, 0, TAU); ctx.fill();
 }
-// the eater: a storybook boy in watercolour and ink, sitting in the chair at the far end of the table, facing left.
-// He comes in two layers: all of him, and his lower face painted at nine jaw positions from wide open to shut
-const SEAT = {box: [388, 286, 564, 434], frames: 9, step: .04, pad: 4, lipX: 411, mouthY: 326};   // his picture's pixels
-// where he sits in the table picture: the back of his shorts on the chair seat, and his size there
-const SEAT_AT = {x: 2300, y: 752, back: [728, 944], k: .5};
-const SEAT_SHUT = .32;
-function seatPlace(tx, ty, ts){
-  // his picture's pixels to the screen, given where the table picture is (left, top) and its scale
-  const k = SEAT_AT.k * ts;
-  return {ox: tx + SEAT_AT.x * ts - SEAT_AT.back[0] * k, oy: ty + SEAT_AT.y * ts - SEAT_AT.back[1] * k, k};
-}
-function drawSeatedBoy(S, F, t){
+// the eater: a storybook boy in profile, painted in watercolour and ink, facing left, close up at the far end of
+// the table. He comes in layers: his head; his lower face, painted at eleven jaw positions from wide open to shut,
+// with the open mouth cut out; and the inside of his mouth at the same eleven positions, which goes behind the biscuit
+const BOY = {lipX: 200, mouthY: 612, box: [100, 500, 520, 880], frames: 11, step: .04, pad: 6};   // picture pixels
+function drawStoryFace(F, t, part){
+  // sized so the opening between his lips takes a good piece of the biscuit's rim
+  const s = 1.3 * 21 * U / 115;
   const engaged = F.done > 0 || F.open > 0 ? 1 : 0;
   const chewing = !reduceMotion && F.open < .05 && F.done > 0;
   const munch = chewing ? .5 - .5 * Math.cos(t * 9) : 0;
-  // wide open as the biscuit comes, shut on each bite, then munching on the mouthful
-  const jaw = engaged ? (chewing ? .12 + .2 * munch : SEAT_SHUT * (1 - F.open)) : 0;
-  const [x0, y0, x1, y1] = SEAT.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * SEAT.pad) + SEAT.pad;
-  const f = clamp(jaw / SEAT.step, 0, SEAT.frames - 1), f0 = Math.floor(f), fr = f - f0;
+  // wide open as the biscuit comes, shut on the bite, then munching on the mouthful
+  const jaw = engaged ? (chewing ? .14 + .26 * munch : .4 * (1 - F.open)) : 0;
+  const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
+  const f = clamp(jaw / BOY.step, 0, BOY.frames - 1), f0 = Math.floor(f), fr = f - f0;
   ctx.save();
-  ctx.translate(S.ox, S.oy); ctx.scale(S.k, S.k);
-  ctx.drawImage(BOYIMG.seat, 0, 0);
-  ctx.drawImage(BOYIMG.seatjaw, 0, row(f0), w, h, x0, y0, w, h);
-  if (fr > .01 && f0 + 1 < SEAT.frames){ ctx.globalAlpha *= fr; ctx.drawImage(BOYIMG.seatjaw, 0, row(f0 + 1), w, h, x0, y0, w, h); }
+  ctx.translate(F.lipsX, F.my + munch * .3 * U);
+  ctx.rotate(.03 * (1 - F.open) * engaged);
+  ctx.scale(s, s);
+  ctx.translate(-BOY.lipX, -BOY.mouthY);
+  const frame = (img, a) => {
+    if (a){ const a0 = ctx.globalAlpha; ctx.globalAlpha = a0 * fr; ctx.drawImage(img, 0, row(f0 + 1), w, h, x0, y0, w, h); ctx.globalAlpha = a0; }
+    else ctx.drawImage(img, 0, row(f0), w, h, x0, y0, w, h);
+  };
+  const blend = fr > .01 && f0 + 1 < BOY.frames;
+  if (part === 'mouth'){
+    // painted behind what is already there (destination-over), so the top layer goes first
+    if (blend) frame(BOYIMG.mouth, true);
+    frame(BOYIMG.mouth, false);
+  } else {
+    ctx.drawImage(BOYIMG.head, 0, 0);
+    frame(BOYIMG.jaw, false);
+    if (blend) frame(BOYIMG.jaw, true);
+  }
   ctx.restore();
 }
 function drawBittenBiscuit(B, done){
@@ -1790,28 +1799,19 @@ function frame(y, t){
   const b = bt.q;
   const m2e = 0;
   const ST = biteState(b);
-  const F = {open: ST.open, done: ST.done};
   // once the bite is pinned the table stays put; it leaves upward with the bite section
   const offY = pan >= 1 ? pinState(SEC.bite, y).top : 0;
-  // the camera moves along the table to its far end, where the boy sits, pulling back as it goes so the whole
-  // of him is in view: the tea scene is drawn as it was, then moved (by, bx) and scaled (a) together
+  // the camera slides along the table to its far end, where the boy sits: the tea scene is drawn as it was, then
+  // moved (bx, by) and scaled (a) together. The table ends just right of the biscuit, where his face is
   const TO = TABLE && CUPIMG ? tableOrigin(geomDunk(dk.top, 0)) : null;
-  let CAM = {a: 1, bx: 0, by: 0};
-  if (TO){
-    // at the end: he is big, seen from his head down past his knees, with a little room above his hair; the picture
-    // still covers the screen top to bottom, and its right edge, just past his chair, meets the right of the screen
-    // his whole figure is 673 table-picture pixels tall; on a narrow screen his mouth (217 pixels in from the
-    // picture's right edge) stays far enough in to leave room for the biscuit
-    const s2 = Math.min(1.4 * H / 673, .6 * W / 217);
-    const A = Math.max(s2 / TO.s, (H + 2) / (TABLE.height * TO.s), W / (TABLE.width * TO.s));
-    const BX = W - A * (TO.x + TABLE.width * TO.s);
-    const BY = clamp(H * .07 - A * (TO.y + 316 * TO.s), H - A * (TO.y + TABLE.height * TO.s), -A * TO.y);
-    CAM = {a: 1 + (A - 1) * glide, bx: BX * glide, by: BY * glide};
-  }
-  const S = TO ? seatPlace(CAM.a * TO.x + CAM.bx, CAM.a * TO.y + CAM.by + offY, CAM.a * TO.s) : null;
-  // his mouth, and how big the biscuit is when it gets there
-  const mouthX = S ? S.ox + SEAT.lipX * S.k : W, mouthY = S ? S.oy + SEAT.mouthY * S.k : H / 2;
-  const rNear = S ? 70 * S.k : 21 * U;
+  const bgEnd = TO ? Math.max(W, TO.x + TABLE_END * TO.s - W * .64) : W;
+  const CAM = {a: 1, bx: -glide * bgEnd, by: 0};
+  // his lips: once the camera has arrived, a little right of the middle of the screen, level with its middle;
+  // before that they ride along with the table
+  const rNear = 21 * U;
+  const lipsEnd = W / 2 + 1.15 * rNear + W * .06;
+  const F = {lipsX: lipsEnd + (1 - glide) * bgEnd, my: H / 2 + offY, open: ST.open, done: ST.done};
+  const mouthX = F.lipsX, mouthY = F.my;
 
   /* biscuit */
   const float = reduceMotion ? 0 : Math.sin(t * 1.3) * .7 * U * (1 - zIn);
@@ -1828,7 +1828,7 @@ function frame(y, t){
     bx = AV.tx - br * ox; by = AV.ty - br * oy;
   }
   // then it floats over to his mouth, getting smaller as it goes back to the far end of the table
-  if (S && b > 0){
+  if (TO && b > 0){
     const n = ST.near, tx = mouthX - ST.lips * rNear;
     bx = lerp(bx, tx, n); by = lerp(by, mouthY, n) - Math.sin(n * Math.PI) * H * .05; br = lerp(br, rNear, n);
   }
@@ -1864,7 +1864,7 @@ function frame(y, t){
   const rTop = TO ? lerp(rTop0, TO.y - RT - 30, glide) : rTop0;
   const rBot = TO ? lerp(rBot0, TO.y + TABLE.height * TO.s - RT - 2, glide) : rBot0;
   const bandOn = rTop + offY < H && rBot + offY > -RT;
-  const boyOn = !!(BOYIMG && S && bandOn && pan > 0 && S.ox + 200 * S.k < W);
+  const boyOn = !!(BOYIMG && TO && bandOn && pan > 0 && F.lipsX - 25 * U < W);
   // the whole tea scene, ribbons and all, rides off to the left, and the far end of the table comes in
   // the table slides far enough that its end comes to rest just right of the biscuit, where the boy sits
   ctx.save(); ctx.translate(CAM.bx, CAM.by + offY); ctx.scale(CAM.a, CAM.a);
@@ -1997,7 +1997,7 @@ function frame(y, t){
 
   /* the boy and the bites */
   if (boyOn){
-    // the biscuit sits behind his face, its edge in his mouth. The bite marks are cut out of the canvas, so the
+    // the biscuit sits behind his face and shows through his open mouth. The bite marks are cut out of the canvas, so the
     // biscuit and the boy are painted on their own layer first: the biscuit, then him over it.
     // He is clipped like the table he sits at, between the gold ribbons
     const main = ctx; ctx = LCTX;
@@ -2008,7 +2008,8 @@ function frame(y, t){
     ctx.beginPath(); domeBelow(rTop + RT); ctx.clip();
     ctx.beginPath(); ctx.rect(-10, -1e5, W + 1e5, 2e5); domeBelow(rBot - 8); ctx.clip('evenodd');
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    drawSeatedBoy(S, F, t);
+    ctx.save(); ctx.globalCompositeOperation = 'destination-over'; drawStoryFace(F, t, 'mouth'); ctx.restore();
+    drawStoryFace(F, t, 'face');
     ctx.restore();
     ctx = main;
     ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(LAYER, 0, 0); ctx.restore();
