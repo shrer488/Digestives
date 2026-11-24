@@ -1798,11 +1798,14 @@ function frame(y, t){
   const TO = TABLE && CUPIMG ? tableOrigin(geomDunk(dk.top, 0)) : null;
   let CAM = {a: 1, bx: 0, by: 0};
   if (TO){
-    // at the end: he takes up about two thirds of the height, the picture's top meets the top of the screen and it
-    // still reaches the bottom, and its right edge, just past his chair, meets the right
-    const s2 = .66 * H / 673;
+    // at the end: he is big, seen from his head down past his knees, with a little room above his hair; the picture
+    // still covers the screen top to bottom, and its right edge, just past his chair, meets the right of the screen
+    // his whole figure is 673 table-picture pixels tall; on a narrow screen his mouth (217 pixels in from the
+    // picture's right edge) stays far enough in to leave room for the biscuit
+    const s2 = Math.min(1.4 * H / 673, .6 * W / 217);
     const A = Math.max(s2 / TO.s, (H + 2) / (TABLE.height * TO.s), W / (TABLE.width * TO.s));
-    const BX = W - A * (TO.x + TABLE.width * TO.s), BY = -A * TO.y;
+    const BX = W - A * (TO.x + TABLE.width * TO.s);
+    const BY = clamp(H * .07 - A * (TO.y + 316 * TO.s), H - A * (TO.y + TABLE.height * TO.s), -A * TO.y);
     CAM = {a: 1 + (A - 1) * glide, bx: BX * glide, by: BY * glide};
   }
   const S = TO ? seatPlace(CAM.a * TO.x + CAM.bx, CAM.a * TO.y + CAM.by + offY, CAM.a * TO.s) : null;
