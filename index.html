@@ -584,7 +584,7 @@ const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jp
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp?v=2'; }
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp?v=2'; }
 { const L = {}; let n = 0;
-  for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=7`; } }
+  for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=8`; } }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table-pano.jpg?v=5'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -1838,7 +1838,9 @@ function frame(y, t){
   // then it floats over to his mouth, getting smaller as it goes back to the far end of the table
   if (TO && b > 0){
     const n = ST.near, tx = mouthX - ST.lips * rNear;
-    bx = lerp(bx, tx, n); by = lerp(by, mouthY, n) - Math.sin(n * Math.PI) * H * .05; br = lerp(br, rNear, n);
+    // level with where his lips meet as they close, a little above the point the face is placed by
+    const biteY = mouthY - 30 * (1.3 * 21 * U / 115);
+    bx = lerp(bx, tx, n); by = lerp(by, biteY, n) - Math.sin(n * Math.PI) * H * .05; br = lerp(br, rNear, n);
   }
   // after the last bite there is nothing left
   const alpha = ST.done >= BITES.length ? 0 : 1;
