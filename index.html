@@ -1614,19 +1614,27 @@ function drawStoryFace(F, t, part){
 function drawBittenBiscuit(B, done){
   drawBiscuit(B);
   if (!done || B.alpha <= .004) return;
-  // each mark turns with the biscuit
-  const r = B.r, hole = (i, grow) => {
-    const a = BITE_A[i] + B.rot, cx = B.x + Math.cos(a) * BITE_C * r, cy = B.y + Math.sin(a) * BITE_C * r, R = BITE_R * r * grow;
+  // the marks are cut in the biscuit's own face, so they lie flat with it and turn with it; drawn as drawBiscuit
+  // draws the face, and again at the back face, so the bite goes through the rim too
+  const r = B.r, asx = Math.max(.002, Math.abs(B.sx)), ax = B.axis || 0;
+  const d = asx < .985 ? r * .13 * Math.sqrt(1 - asx * asx) : 0, dir = -Math.sign(B.sx || 1);
+  const inFace = (shift, fn) => {
+    ctx.save(); ctx.translate(B.x, B.y); ctx.rotate(B.rot + ax); ctx.translate(-dir * d / 2 + shift, 0);
+    ctx.scale(asx, 1); ctx.rotate(-ax); fn(); ctx.restore();
+  };
+  const hole = (i, grow) => {
+    const cx = Math.cos(BITE_A[i]) * BITE_C * r, cy = Math.sin(BITE_A[i]) * BITE_C * r, R = BITE_R * r * grow;
     ctx.beginPath();
     for (let k = 0; k <= 96; k++){ const t = k / 96 * TAU, w = R * (1 + .025 * Math.sin(t * 19 + i * 2) + .012 * Math.sin(t * 41 + i)); k ? ctx.lineTo(cx + Math.cos(t) * w, cy + Math.sin(t) * w) : ctx.moveTo(cx + w, cy); }
     ctx.closePath();
   };
   // a crumbly darker edge where the teeth went through, then the bites themselves
-  ctx.save(); ctx.beginPath(); ctx.arc(B.x, B.y, r, 0, TAU); ctx.clip();
-  for (let i = 0; i < done; i++){ hole(i, 1.04); ctx.fillStyle = 'rgba(120,70,30,.45)'; ctx.fill(); }
-  ctx.restore();
+  inFace(0, () => {
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.clip();
+    for (let i = 0; i < done; i++){ hole(i, 1.04); ctx.fillStyle = 'rgba(120,70,30,.45)'; ctx.fill(); }
+  });
   ctx.save(); ctx.globalCompositeOperation = 'destination-out';
-  for (let i = 0; i < done; i++){ hole(i, 1); ctx.fill(); }
+  for (const sh of [0, dir * d / 2, dir * d]) inFace(sh, () => { for (let i = 0; i < done; i++){ hole(i, 1); ctx.fill(); } });
   ctx.restore();
 }
 function mouthInterior(mx, my, mw, up, dn){
@@ -1804,7 +1812,7 @@ function frame(y, t){
   // the camera slides along the table to its far end, where the boy sits: the tea scene is drawn as it was, then
   // moved (bx, by) and scaled (a) together. The table ends just right of the biscuit, where his face is
   const TO = TABLE && CUPIMG ? tableOrigin(geomDunk(dk.top, 0)) : null;
-  const bgEnd = TO ? Math.max(W, TO.x + TABLE_END * TO.s - W * .64) : W;
+  const bgEnd = TO ? Math.max(W, Math.min(TO.x + TABLE_END * TO.s - W * .64, TO.x + TABLE.width * TO.s - W - 2)) : W;
   const CAM = {a: 1, bx: -glide * bgEnd, by: 0};
   // his lips: once the camera has arrived, a little right of the middle of the screen, level with its middle;
   // before that they ride along with the table
@@ -1844,6 +1852,13 @@ function frame(y, t){
     wetLine: -.1 - .32 * sf,
     pores: Math.floor(sf * PORES.length)
   };
+  // on its way to him it tips over flat, the way a biscuit is held to be eaten, its near edge a little low:
+  // seen from just above the table it becomes a thin oval, and it spins on its own face between bites
+  if (TO && b > 0){
+    const n = ease(ST.near), FLAT = .34, TIP = .1;
+    B.sx = Math.sign(B.sx || 1) * lerp(Math.abs(B.sx), FLAT, n);
+    B.axis = Math.PI / 2 - TIP * n - B.rot;
+  }
   const behindCup = cupVisible && q > .05 && l < .95;
 
   // soft shadow while it floats over the page
