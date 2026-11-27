@@ -695,24 +695,25 @@ function biteState(b, r){
   // where the lips are (their front edge, biscuit radii from its centre), how open, which bites are done,
   // and how far the biscuit has turned
   const RET = .55;   // how far the biscuit draws back between bites, so each bite mark shows
-  let lips = BITE_LIP[0] + RET, open = 0, done = 0, turn = 0;
+  let lips = BITE_LIP[0] + RET, open = 0, done = 0, turn = 0, lean = 0;
   for (let i = 0; i < BITES.length; i++){
     const [a0, a1] = BITES[i], p = seg(b, a0, a1);
     if (b < a0) break;
     const target = BITE_LIP[i], from = BITE_LIP[Math.max(0, i - 1)] + RET;
     turn = BITE_A[i];
-    if (p < .4){ lips = lerp(from, target, ease(p / .4)); open = Math.sin(Math.min(1, p / .3) * Math.PI / 2); }
-    else if (p < .55){ lips = target; open = 1 - ease((p - .4) / .15); }
+    // he leans in to meet it, bites, then sits back to chew
+    if (p < .4){ lips = lerp(from, target, ease(p / .4)); open = Math.sin(Math.min(1, p / .3) * Math.PI / 2); lean = ease(p / .4); }
+    else if (p < .55){ lips = target; open = 1 - ease((p - .4) / .15); lean = 1; }
     else {
       const u = ease((p - .55) / .45);
+      lean = 1 - ease(Math.min(1, (p - .55) / .25));
       lips = lerp(target, BITE_LIP[Math.min(i + 1, BITES.length - 1)] > 0 ? BITE_LIP[0] + RET : target + RET, u); open = 0;
       // while he chews, the biscuit turns to bring the next piece of rim round to him
       if (i + 1 < BITES.length) turn = lerp(BITE_A[i], BITE_A[i + 1], u);
     }
     if (p >= .5) done = i + 1;
   }
-  // the biscuit's flight from the middle of the screen to his mouth
-  return {lips, open, done, turn};
+  return {lips, open, done, turn, lean};
 }
 function pose(name, y){
   const N = narrow;
@@ -1588,13 +1589,13 @@ function drawStoryFace(F, t, part){
   // he chews as you scroll, about three chews between bites, and holds still when the page does
   const munch = chewing ? .5 - .5 * Math.cos(F.chew) : 0;
   // wide open as the biscuit comes, shut on the bite, then munching on the mouthful
-  const jaw = engaged ? (chewing ? .14 + .26 * munch : .4 * (1 - F.open)) : 0;
+  const jaw = engaged ? (chewing ? .4 - .08 * munch : .4 * (1 - F.open)) : 0;   // chewing: lips stay together
   const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
   // the nearest painted frame, never two blended: their outlines would both show under his jaw
   const f0 = Math.round(clamp(jaw / BOY.step, 0, BOY.frames - 1)), fr = 0;
   ctx.save();
   ctx.translate(F.lipsX, F.my + munch * .3 * U);
-  ctx.rotate(.03 * (1 - F.open) * engaged);
+  ctx.rotate(.03 * (1 - F.open) * engaged - .05 * (F.lean || 0));   // his head dips forward as he leans in
   ctx.scale(s, s);
   ctx.translate(-BOY.lipX, -BOY.mouthY);
   const frame = (img, a) => {
@@ -1820,8 +1821,10 @@ function frame(y, t){
   // before that they ride along with the table
   const rNear = 21 * U;
   const lipsEnd = W / 2 + 1.15 * rNear + W * .06;
-  const F = {lipsX: lipsEnd + (1 - glide) * bgEnd, my: H / 2 + offY, open: ST.open, done: ST.done, chew: b * 82};
-  const mouthX = F.lipsX, mouthY = F.my;
+  const LEAN = .28 * rNear;   // how far his head comes forward to meet each bite
+  const F = {lipsX: lipsEnd + (1 - glide) * bgEnd - LEAN * ST.lean, my: H / 2 + offY + .06 * rNear * ST.lean,
+             open: ST.open, done: ST.done, chew: b * 82, lean: ST.lean};
+  const mouthX = F.lipsX + LEAN * ST.lean, mouthY = F.my - .06 * rNear * ST.lean;
 
   /* biscuit */
   const float = reduceMotion ? 0 : Math.sin(t * 1.3) * .7 * U * (1 - zIn);
@@ -1840,9 +1843,9 @@ function frame(y, t){
   // it floats over to his mouth while the camera slides along the table, arriving as the slide ends
   const near = TO ? ease(seg(pan, .25, 1)) : 0;
   if (TO && pan > 0){
-    const n = near, tx = mouthX - ST.lips * rNear;
+    const n = near, tx = mouthX - ST.lips * rNear - LEAN * ST.lean;
     // level with where his lips meet as they close, a little above the point the face is placed by
-    const biteY = mouthY - 30 * (1.3 * 21 * U / 115);
+    const biteY = mouthY - 30 * (1.3 * 21 * U / 115) + Math.sin(.26) * rNear * .75;
     bx = lerp(bx, tx, n); by = lerp(by, biteY, n) - Math.sin(n * Math.PI) * H * .05; br = lerp(br, rNear, n);
   }
   // after the last bite there is nothing left
@@ -1858,10 +1861,10 @@ function frame(y, t){
     pores: Math.floor(sf * PORES.length)
   };
   // as soon as it leaves the tea it starts to turn: a half turn on its own face while it tips back, the way a
-  // biscuit is held to be eaten, its near edge a little low. Seen from just above the table it becomes an oval,
+  // biscuit is held to be eaten, tipped up toward his mouth. Seen from just above the table it becomes an oval,
   // and between bites it turns on its face to bring fresh edge to his mouth
   if (TO && pan > 0){
-    const n = ease(seg(pan, 0, .85)), FLAT = .55, TIP = .1;
+    const n = ease(seg(pan, 0, .85)), FLAT = .55, TIP = -.26;   // negative: the edge toward him is the high one
     B.rot += Math.PI * n;
     B.sx = Math.sign(B.sx || 1) * lerp(Math.abs(B.sx), FLAT, n);
     B.axis = Math.PI / 2 - TIP * n - B.rot;
