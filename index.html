@@ -100,7 +100,7 @@ p{margin:0}
 .pin{position:relative}
 .sticky{position:sticky;z-index:4;top:0;height:100vh;height:100svh;overflow:hidden}
 #dunk{height:640vh}
-#bite{height:410vh}   /* the first 90vh carry on the sideways pan along the table */
+#bite{height:330vh}   /* the first 30vh carry on the sideways pan along the table */
 
 /* flavours grid */
 .flavours{padding-block:120px 140px}
@@ -584,7 +584,7 @@ const PHOTOS = {under: 'img/plain.jpg', milk: 'img/milk.jpg', dark: 'img/dark.jp
 { const im = new Image(); im.onload = () => { CUPSHADOW = cupShadow(im); CUPIMG = im; }; im.src = 'img/teacup.webp?v=2'; }
 { const im = new Image(); im.onload = () => { CUTIMG = im; }; im.src = 'img/teacup-cut.webp?v=2'; }
 { const L = {}; let n = 0;
-  for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=8`; } }
+  for (const k of ['head', 'jaw', 'mouth']){ const im = new Image(); im.onload = () => { L[k] = im; if (++n === 3) BOYIMG = L; }; im.src = `img/storyboy-${k}.webp?v=9`; } }
 { const im = new Image(); im.onload = () => { TABLE = tableCanvas(im); }; im.src = 'img/table-pano.jpg?v=5'; }
 Promise.all(Object.entries(PHOTOS).map(([id, src]) => new Promise((ok, no) => {
   const im = new Image(); im.onload = () => ok([id, im]); im.onerror = no; im.src = src;
@@ -687,7 +687,7 @@ function geomDunk(top, dd = 0){
 // and he eats it in four bites.
 // His mouth is narrower than the biscuit, so he nibbles the rim: between bites the biscuit turns, bringing
 // a fresh piece of edge round to him, and the last bite pops in what is left
-const BITES = [[.14, .30], [.32, .48], [.50, .66], [.68, .84]];   // scroll windows, within the bite section
+const BITES = [[.04, .22], [.27, .45], [.50, .68], [.73, .91]];   // scroll windows, within the bite section
 const BITE_A = [0, TAU / 3, 2 * TAU / 3, 5 * TAU / 6];            // where on the biscuit each bite lands
 const BITE_LIP = [.6, .6, .6, -.62];                               // how far in his lips go, biscuit radii from its centre
 const BITE_C = 1.5, BITE_R = .9;                                  // each bite mark: a scoop centred this far out, this big
@@ -712,7 +712,7 @@ function biteState(b, r){
     if (p >= .5) done = i + 1;
   }
   // the biscuit's flight from the middle of the screen to his mouth
-  return {lips, open, done, turn, near: ease(seg(b, 0, .12))};
+  return {lips, open, done, turn};
 }
 function pose(name, y){
   const N = narrow;
@@ -1589,7 +1589,8 @@ function drawStoryFace(F, t, part){
   // wide open as the biscuit comes, shut on the bite, then munching on the mouthful
   const jaw = engaged ? (chewing ? .14 + .26 * munch : .4 * (1 - F.open)) : 0;
   const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
-  const f = clamp(jaw / BOY.step, 0, BOY.frames - 1), f0 = Math.floor(f), fr = f - f0;
+  // the nearest painted frame, never two blended: their outlines would both show under his jaw
+  const f0 = Math.round(clamp(jaw / BOY.step, 0, BOY.frames - 1)), fr = 0;
   ctx.save();
   ctx.translate(F.lipsX, F.my + munch * .3 * U);
   ctx.rotate(.03 * (1 - F.open) * engaged);
@@ -1778,7 +1779,7 @@ function frame(y, t){
   /* from the tea table to the bite the page turns sideways: scrolling down slides the tea scene off to the
      left and brings the bite in from the right, while the biscuit stays in the middle */
   // the pan takes about two screens of scroll: the one between the sections and the first 90vh of the bite
-  const dunkEnd = SEC.dunk.top + SEC.dunk.h - H, PAN_E = .9 * H;
+  const dunkEnd = SEC.dunk.top + SEC.dunk.h - H, PAN_E = .3 * H;
   const pan = clamp((y - dunkEnd) / Math.max(1, SEC.bite.top + PAN_E - dunkEnd));
   const glide = .5 - .5 * Math.cos(pan * Math.PI);        // gentle at both ends, never in a rush
   const panning = pan > 0 && pan < 1, panX = glide * W;
@@ -1835,9 +1836,10 @@ function frame(y, t){
     const [ox, oy] = faceToScreen(AV.ax, AV.ay, brot, tiltAxis, tiltSx);
     bx = AV.tx - br * ox; by = AV.ty - br * oy;
   }
-  // then it floats over to his mouth, getting smaller as it goes back to the far end of the table
-  if (TO && b > 0){
-    const n = ST.near, tx = mouthX - ST.lips * rNear;
+  // it floats over to his mouth while the camera slides along the table, arriving as the slide ends
+  const near = TO ? ease(seg(pan, .25, 1)) : 0;
+  if (TO && pan > 0){
+    const n = near, tx = mouthX - ST.lips * rNear;
     // level with where his lips meet as they close, a little above the point the face is placed by
     const biteY = mouthY - 30 * (1.3 * 21 * U / 115);
     bx = lerp(bx, tx, n); by = lerp(by, biteY, n) - Math.sin(n * Math.PI) * H * .05; br = lerp(br, rNear, n);
@@ -1854,10 +1856,12 @@ function frame(y, t){
     wetLine: -.1 - .32 * sf,
     pores: Math.floor(sf * PORES.length)
   };
-  // on its way to him it tips over flat, the way a biscuit is held to be eaten, its near edge a little low:
-  // seen from just above the table it becomes a thin oval, and it spins on its own face between bites
-  if (TO && b > 0){
-    const n = ease(ST.near), FLAT = .34, TIP = .1;
+  // as soon as it leaves the tea it starts to turn: a half turn on its own face while it tips back, the way a
+  // biscuit is held to be eaten, its near edge a little low. Seen from just above the table it becomes an oval,
+  // and between bites it turns on its face to bring fresh edge to his mouth
+  if (TO && pan > 0){
+    const n = ease(seg(pan, 0, .85)), FLAT = .55, TIP = .1;
+    B.rot += Math.PI * n;
     B.sx = Math.sign(B.sx || 1) * lerp(Math.abs(B.sx), FLAT, n);
     B.axis = Math.PI / 2 - TIP * n - B.rot;
   }
@@ -1865,7 +1869,7 @@ function frame(y, t){
 
   // soft shadow while it floats over the page
   const shA = clamp((G.ry - H * .9) / (H * .5)) * (1 - zIn);
-  B.lift = shA;
+  B.lift = shA * (1 - glide);   // no shadow once it is over the table
 
   /* cup scene with camera zoom */
   // zoom in only as far as the text panel on the left allows
