@@ -1584,8 +1584,9 @@ function drawStoryFace(F, t, part){
   // sized so the opening between his lips takes a good piece of the biscuit's rim
   const s = 1.3 * 21 * U / 115;
   const engaged = F.done > 0 || F.open > 0 ? 1 : 0;
-  const chewing = !reduceMotion && F.open < .05 && F.done > 0;
-  const munch = chewing ? .5 - .5 * Math.cos(t * 9) : 0;
+  const chewing = F.open < .05 && F.done > 0;
+  // he chews as you scroll, about three chews between bites, and holds still when the page does
+  const munch = chewing ? .5 - .5 * Math.cos(F.chew) : 0;
   // wide open as the biscuit comes, shut on the bite, then munching on the mouthful
   const jaw = engaged ? (chewing ? .14 + .26 * munch : .4 * (1 - F.open)) : 0;
   const [x0, y0, x1, y1] = BOY.box, w = x1 - x0, h = y1 - y0, row = i => i * (h + 2 * BOY.pad) + BOY.pad;
@@ -1819,7 +1820,7 @@ function frame(y, t){
   // before that they ride along with the table
   const rNear = 21 * U;
   const lipsEnd = W / 2 + 1.15 * rNear + W * .06;
-  const F = {lipsX: lipsEnd + (1 - glide) * bgEnd, my: H / 2 + offY, open: ST.open, done: ST.done};
+  const F = {lipsX: lipsEnd + (1 - glide) * bgEnd, my: H / 2 + offY, open: ST.open, done: ST.done, chew: b * 82};
   const mouthX = F.lipsX, mouthY = F.my;
 
   /* biscuit */
